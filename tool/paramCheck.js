@@ -4,7 +4,6 @@
  * @Explain: 参数字段检查
  */
 
-function check(params, requestParam) {}
 /**
  * 表单参数检查
  * @param object params 接收参数

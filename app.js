@@ -10,6 +10,7 @@ const cors = require('koa2-cors'); // 跨域中间件
 
 const index = require('./routes/index');
 const users = require('./routes/users');
+const security = require('./routes/security');
 const response = require('./middleware/response');
 
 // error handler
@@ -45,6 +46,7 @@ app.use(async (ctx, next) => {
 // routes
 app.use(index.routes(), index.allowedMethods());
 app.use(users.routes(), users.allowedMethods());
+app.use(security.routes(), security.allowedMethods());
 
 // error-handling
 app.on('error', (err, ctx) => {
