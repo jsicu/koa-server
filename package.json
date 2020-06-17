@@ -19,9 +19,18 @@
     "koa-router": "^7.4.0",
     "koa-static": "^5.0.0",
     "koa-views": "^6.2.0",
+    "koa2-cors": "^2.0.6",
+    "mysql2": "^2.1.0",
     "pug": "^2.0.3"
   },
   "devDependencies": {
+    "eslint": "^7.2.0",
+    "eslint-config-koa": "^2.0.2",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "nodemon": "^1.19.1"
   }
 }
