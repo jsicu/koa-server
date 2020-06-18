@@ -11,6 +11,7 @@
   "dependencies": {
     "crypto": "^1.0.1",
     "debug": "^4.1.1",
+    "fs": "^0.0.1-security",
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
     "koa-convert": "^1.2.0",
@@ -22,6 +23,7 @@
     "koa-views": "^6.2.0",
     "koa2-cors": "^2.0.6",
     "mysql2": "^2.1.0",
+    "node-rsa": "^1.0.8",
     "pug": "^2.0.3"
   },
   "devDependencies": {

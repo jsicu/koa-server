@@ -1,7 +1,10 @@
 const mysql = require('../mysql');
 const router = require('koa-router')();
 const paramCheck = require('../tool/paramCheck');
-const crypto = require('crypto');
+
+const NodeRSA = require('node-rsa');
+const key = new NodeRSA({ b: 1024 });
+key.setOptions({ encryptionScheme: 'pkcs1' });
 
 router.prefix('/security');
 
@@ -11,6 +14,8 @@ router.post('/login', async (ctx, next) => {
   if (paramCheck.check(user, requestParam) !== true) {
     ctx.error([0, paramCheck.check(user, requestParam)]);
   } else {
+    const password = user.password.replace(/\s+/g, '+'); // 防止公钥有空格存在
+    user.password = key.decrypt(password, 'utf8'); // 解密
     // eslint-disable-next-line quotes
     const sql = "select * from `user` where `name`='" + user.name + "' and `password`='" + user.password + "'";
     const result = await mysql.query(sql);
@@ -23,19 +28,9 @@ router.post('/login', async (ctx, next) => {
 });
 
 // 加密公钥获取
-router.post('/publicKey', async (ctx, next) => {
-  const requestParam = ['publicKey'];
-  const param = ctx.request.body;
-  if (paramCheck.check(param, requestParam) !== true) {
-    ctx.error([0, paramCheck.check(param, requestParam)]);
-  } else {
-    const obj = crypto.createHash('sha256');
-    obj.update(param.publicKey);
-    const str = obj.digest('hex'); // hex是十六进制
-    ctx.success(str);
-  }
+router.get('/publicKey', async (ctx, next) => {
+  const publicKey = key.exportKey('public'); // 生成公钥
+  ctx.success(publicKey);
 });
-
-
 
 module.exports = router;
