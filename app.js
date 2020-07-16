@@ -12,6 +12,7 @@ const index = require('./routes/index');
 const users = require('./routes/users');
 const security = require('./routes/security');
 const response = require('./middleware/response');
+const token = require('./middleware/token');
 
 // error handler
 onerror(app);
@@ -28,6 +29,7 @@ app.use(logger());
 app.use(cors());
 app.use(require('koa-static')(__dirname + '/public'));
 app.use(response); // 返回体
+app.use(token); // token
 
 app.use(
   views(__dirname + '/views', {
