@@ -12,6 +12,7 @@
     "crypto": "^1.0.1",
     "debug": "^4.1.1",
     "fs": "^0.0.1-security",
+    "joi": "^17.1.1",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
@@ -20,12 +21,17 @@
     "koa-logger": "^3.2.0",
     "koa-onerror": "^4.1.0",
     "koa-router": "^7.4.0",
+    "koa-session": "^6.0.0",
     "koa-static": "^5.0.0",
     "koa-views": "^6.2.0",
     "koa2-cors": "^2.0.6",
+    "koa2-swagger-ui": "^4.0.0",
+    "log4js": "^6.3.0",
     "mysql2": "^2.1.0",
     "node-rsa": "^1.0.8",
-    "pug": "^2.0.3"
+    "nodemailer": "^6.4.10",
+    "pug": "^2.0.3",
+    "swagger-jsdoc": "^4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",

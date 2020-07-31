@@ -5,3 +5,7 @@
 # 目录树生成
 
 treer -e treer.md -i "/node_modules|.git/"
+
+# swagger 地址
+
+http://localhost:4000/swagger

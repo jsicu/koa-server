@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
+// const fs = require('fs');
 const NodeRSA = require('node-rsa');
 
 // const serect = 'token'; // 密钥，不能丢
@@ -11,8 +11,8 @@ const mysql = require('../../mysql');
  * token生成
  * @param Object userinfo
  */
-exports.getToken = userinfo => {
-  // console.log(userinfo);
+exports.getToken = (ctx, userinfo) => {
+  console.log(userinfo);
   // 创建token并导出
   const token = jwt.sign(userinfo, serect, { expiresIn: '1h' });
   const sql = `INSERT INTO online_token (token) VALUES ('${token}')`; // 存入token
@@ -39,5 +39,15 @@ exports.checkToken = tokens => {
 exports.decryptToken = tokens => {
   if (tokens) {
     return key.decrypt(tokens, 'utf8');
+  }
+};
+
+/**
+ * token解码
+ * @param String tokens
+ */
+exports.decryptRSAToken = tokens => {
+  if (tokens) {
+    return jwt.decode(key.decrypt(tokens, 'utf8'), serect);
   }
 };

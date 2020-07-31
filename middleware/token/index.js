@@ -4,11 +4,12 @@
  * @description token中间件
  */
 
-const { getToken, checkToken, decryptToken } = require('./token');
+const { getToken, checkToken, decryptToken, decryptRSAToken } = require('./token');
 
 module.exports = async (ctx, next) => {
   ctx.getToken = getToken.bind(null, ctx);
   ctx.checkToken = checkToken.bind(null, ctx);
   ctx.decryptToken = decryptToken.bind(null, ctx);
+  ctx.decryptRSAToken = decryptRSAToken.bind(null, ctx);
   await next();
 };
