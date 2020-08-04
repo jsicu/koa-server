@@ -1,6 +1,6 @@
 const mysql = require('../mysql');
 const router = require('koa-router')();
-const paramCheck = require('../tool/paramCheck');
+const paramCheck = require('../utils/paramCheck');
 
 router.prefix('/users');
 

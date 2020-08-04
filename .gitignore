@@ -1,5 +1,7 @@
 node_modules/
 package-lock.json
+# 日志文件
+logs/
 
 # Editor directories and files
 .idea
