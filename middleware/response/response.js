@@ -11,7 +11,7 @@
 
 const response = {
   code: 1,
-  data: [],
+  data: '',
   message: '操作成功'
 };
 
