@@ -21,12 +21,6 @@ const handlePath = '/handle';
 const handleFileName = 'handle';
 const handleLogPath = baseLogPath + handlePath + '/' + handleFileName;
 
-/* 日常console输出记录 */
-// 操作日志目录、文件名、输出完整路径
-const consolePath = '/console';
-const consoleFileName = 'console';
-const consoleLogPath = baseLogPath + consolePath + '/' + consoleFileName;
-
 module.exports = {
   // 日志格式等设置
   appenders: {

@@ -131,7 +131,7 @@ router.post('/email-verify', async (ctx, next) => {
       .error(new Error(true))
   });
   const value = schema.validate({ email });
-  // if (value !== true) return ctx.error([400, '邮箱不合法!']);
+  if (value !== true) return ctx.error([400, '邮箱不合法!']);
 
   const mailOptions = {
     // 发送给用户显示的字段
@@ -140,17 +140,17 @@ router.post('/email-verify', async (ctx, next) => {
     subject: '账号注册邮箱验证码',
     text: '验证码：' + Email.verify
   };
-  // const info = await Email.transporter.sendMail(mailOptions);
-  // if (info) {
-  ctx.session.emailCode = Email.verify;
-  ctx.success('验证码发送成功！');
-  // } else {
-  // ctx.error([0, '邮箱验证失败！']);
-  // }
+  const info = await Email.transporter.sendMail(mailOptions);
+  if (info) {
+    ctx.session.emailCode = Email.verify;
+    ctx.success('验证码发送成功！');
+  } else {
+    ctx.error([0, '邮箱验证失败！']);
+  }
 });
 
 /**
- * @swagger
+ *
  * /security/register:
  *   post:
  *     description: 注册
@@ -182,6 +182,7 @@ router.post('/email-verify', async (ctx, next) => {
  *       200:
  *         description: 获取成功
  */
+// 未开发
 router.post('/register', async (ctx, next) => {
   console.log(ctx.session);
   ctx.success(ctx.session.emailCode);

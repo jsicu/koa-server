@@ -15,7 +15,7 @@ const security = require('./routes/security');
 const response = require('./middleware/response');
 const token = require('./middleware/token');
 const mysql = require('./mysql');
-// const logsUtil = require('./utils/logs.js'); // 日志文件
+const logsUtil = require('./utils/logs.js'); // 日志文件
 
 // swagger配置
 const swagger = require('./config/swagger');
