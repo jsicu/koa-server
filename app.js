@@ -11,7 +11,9 @@ const koaSwagger = require('koa2-swagger-ui');
 
 const index = require('./routes/index');
 const users = require('./routes/users');
-const security = require('./routes/security');
+const security = require('./routes/security'); // 登陆认证
+const image = require('./routes/image'); // 图片处理
+
 const response = require('./middleware/response');
 const token = require('./middleware/token');
 const mysql = require('./mysql');
@@ -87,6 +89,7 @@ app.use(async (ctx, next) => {
 app.use(index.routes(), index.allowedMethods());
 app.use(users.routes(), users.allowedMethods());
 app.use(security.routes(), security.allowedMethods());
+app.use(image.routes(), image.allowedMethods());
 
 // error-handling
 app.on('error', (err, ctx) => {
