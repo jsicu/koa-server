@@ -63,8 +63,24 @@ router.post('/login', async (ctx, next) => {
  *     description: 获取加密公钥
  *     tags: [用户鉴权模块]
  *     responses:
- *       200:
- *         description: 获取成功
+ *       '200':
+ *         description: Ok
+ *         schema:
+ *           type: 'object'
+ *           properties:
+ *             code:
+ *               type: 'number'
+ *               description: 状态码
+ *             data:
+ *               type: 'string'
+ *               description: 加密公钥
+ *             message:
+ *               type: 'string'
+ *               description: 消息提示
+ *       '400':
+ *         description: 请求参数错误
+ *       '404':
+ *         description: not found
  */
 // 加密公钥获取
 router.get('/publicKey', async (ctx, next) => {
@@ -86,8 +102,23 @@ router.get('/publicKey', async (ctx, next) => {
  *        in: query
  *        type: string
  *     responses:
- *       200:
- *         description: 退出成功
+ *       '200':
+ *         description: Ok
+ *         schema:
+ *           type: 'object'
+ *           properties:
+ *             code:
+ *               type: 'number'
+ *             data:
+ *               type: 'object'
+ *               description: 返回数据
+ *             message:
+ *               type: 'string'
+ *               description: 消息提示
+ *       '400':
+ *         description: 请求参数错误
+ *       '404':
+ *         description: not found
  */
 router.post('/logout', async (ctx, next) => {
   const decryptTk = ctx.decryptToken(ctx.request.header.token);
@@ -150,7 +181,7 @@ router.post('/email-verify', async (ctx, next) => {
 });
 
 /**
- *
+ * @swagger
  * /security/register:
  *   post:
  *     description: 注册

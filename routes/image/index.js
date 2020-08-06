@@ -20,13 +20,22 @@ router.prefix('/image');
  *         type: string
  *     responses:
  *       '200':
- *         description: A JSON array of user names
+ *         description: Ok
  *         schema:
- *           $ref: './definitions.yaml#/definitions/WeatherResponse'
+ *           type: 'object'
+ *           properties:
+ *             code:
+ *               type: 'number'
+ *             data:
+ *               type: 'object'
+ *               description: 返回数据
+ *             message:
+ *               type: 'string'
+ *               description: 消息提示
  *       '400':
- *         description: 无效的 id
+ *         description: 请求参数错误
  *       '404':
- *         description: 找不到指定的资源
+ *         description: not found
  */
 // #endregion
 
