@@ -8,6 +8,7 @@
  */
 
 'use strict';
+const logsUtil = require('../../utils/logs.js'); // 日志文件
 
 const response = {
   code: 1,
@@ -59,5 +60,6 @@ exports.error = (ctx, code = 0, message = '操作失败') => {
     message = code[1];
     code = code[0];
   }
+  logsUtil.logError(ctx, message, 0); // 记录异常日志
   this.response(ctx, response.data, code, message);
 };

@@ -31,7 +31,7 @@ module.exports = {
       pattern: '-yyyy-MM-dd-hh.log',
       alwaysIncludePattern: true,
       encoding: 'utf-8',
-      maxLogSize: 1000,
+      maxLogSize: 1048576,
       numBackups: 3,
       path: errorPath
     },
@@ -41,7 +41,7 @@ module.exports = {
       pattern: '-yyyy-MM-dd-hh.log',
       alwaysIncludePattern: true,
       encoding: 'utf-8',
-      maxLogSize: 1000,
+      maxLogSize: 1048576, // 日志文件大小最大1M，单位字节
       numBackups: 3,
       path: responsePath
     },
@@ -51,9 +51,9 @@ module.exports = {
       pattern: '-yyyy-MM-dd-hh.log',
       alwaysIncludePattern: true,
       encoding: 'utf-8',
-      maxLogSize: 1000,
+      maxLogSize: 1048576,
       numBackups: 3,
-      path: responsePath
+      path: handlePath
     }
   },
   // 供外部调用的名称和对应设置定义

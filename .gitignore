@@ -2,6 +2,7 @@ node_modules/
 package-lock.json
 # 日志文件
 logs/
+backups/ 
 
 # Editor directories and files
 .idea
