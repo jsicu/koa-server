@@ -16,9 +16,11 @@ const image = require('./routes/image'); // 图片处理
 
 const response = require('./middleware/response');
 const token = require('./middleware/token');
+const utils = require('./utils');
 const mysql = require('./mysql');
 const logsUtil = require('./utils/logs.js'); // 日志文件
 
+let ms = 0; // 接口耗时
 // swagger配置
 const swagger = require('./config/swagger');
 app.use(swagger.routes(), swagger.allowedMethods());
@@ -50,13 +52,20 @@ app.use(
     enableTypes: ['json', 'form', 'text']
   })
 );
+
+// 权限认证
+// app.use(async (ctx, next) => {
+//   console.log(ctx);
+//   await next();
+// });
+
 app.use(json());
 app.use(logger());
-// 设置允许跨域访问该服务.
-app.use(cors());
-app.use(require('koa-static')(__dirname + '/public'));
+app.use(cors()); // 设置允许跨域访问该服务.
+app.use(require('koa-static')(__dirname + '/public')); // 静态资源
 app.use(response); // 返回体
 app.use(token); // token
+app.use(utils); // 公共方法
 
 app.use(
   views(__dirname + '/views', {
@@ -68,7 +77,7 @@ app.use(
 app.use(async (ctx, next) => {
   const start = new Date();
   await next();
-  const ms = new Date() - start;
+  ms = new Date() - start;
   logsUtil.logResponse(ctx, ms); // 记录响应日志
   // 日志白名单
   // const whiteList = ['/security/login', '/security/email-verify', '/security/publicKey']
@@ -93,8 +102,9 @@ app.use(image.routes(), image.allowedMethods());
 
 // error-handling
 app.on('error', (err, ctx) => {
-  console.error('server error', err, ctx);
-  // logsUtil.logError(ctx, err, 123); // 记录异常日志
+  // console.error('server error', err, ctx);
+  logsUtil.logError(ctx, err, ms); // 记录异常日志
+  ctx.error([0, err]);
 });
 
 module.exports = app;

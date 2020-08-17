@@ -35,7 +35,6 @@ router.prefix('/security');
 router.post('/login', async (ctx, next) => {
   const requestParam = ['name', 'password'];
   const user = ctx.request.body;
-  console.log(user);
   if (paramCheck.check(user, requestParam) !== true) {
     ctx.error([0, paramCheck.check(user, requestParam)]);
   } else {
