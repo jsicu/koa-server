@@ -9,6 +9,7 @@ key.setOptions({ encryptionScheme: 'pkcs1' });
 
 router.prefix('/security');
 
+// #region
 /**
  * @swagger
  * /security/login:
@@ -32,6 +33,7 @@ router.prefix('/security');
  *       200:
  *         description: 登入成功
  */
+// #endregion
 router.post('/login', async (ctx, next) => {
   const requestParam = ['name', 'password'];
   const user = ctx.request.body;
@@ -55,6 +57,8 @@ router.post('/login', async (ctx, next) => {
   }
 });
 
+// 加密公钥获取
+// #region
 /**
  * @swagger
  * /security/publicKey:
@@ -81,12 +85,13 @@ router.post('/login', async (ctx, next) => {
  *       '404':
  *         description: not found
  */
-// 加密公钥获取
+// #endregion
 router.get('/publicKey', async (ctx, next) => {
   const publicKey = key.exportKey('public'); // 生成公钥
   ctx.success(publicKey);
 });
 
+// #region
 /**
  * @swagger
  * /security/logout:
@@ -119,6 +124,7 @@ router.get('/publicKey', async (ctx, next) => {
  *       '404':
  *         description: not found
  */
+// #endregion
 router.post('/logout', async (ctx, next) => {
   const decryptTk = ctx.decryptToken(ctx.request.header.token);
   const sql = `DELETE FROM online_token WHERE token = '${decryptTk}'`;
@@ -179,8 +185,10 @@ router.post('/email-verify', async (ctx, next) => {
   }
 });
 
+// 注册接口（未开发）
+// #region
 /**
- * @swagger
+ *
  * /security/register:
  *   post:
  *     description: 注册
@@ -212,10 +220,16 @@ router.post('/email-verify', async (ctx, next) => {
  *       200:
  *         description: 获取成功
  */
-// 未开发
+// #endregion
 router.post('/register', async (ctx, next) => {
   console.log(ctx.session);
   ctx.success(ctx.session.emailCode);
 });
 
+// 导航栏获取
+router.get('/navigation', async (ctx, next) => {
+  console.log(ctx.request.header.token);
+  // console.log(ctx.session);
+  ctx.success(true);
+});
 module.exports = router;

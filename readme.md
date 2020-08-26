@@ -4,7 +4,7 @@
 
 # 目录树生成
 
-treer -e treer.md -i "/node_modules|.git/"
+cmd 运行：treer -e treer.md -i "/node_modules|.git|.log|.png|.jpg/"
 
 # swagger 地址
 

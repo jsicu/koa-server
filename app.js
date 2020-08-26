@@ -53,19 +53,30 @@ app.use(
   })
 );
 
-// 权限认证
-// app.use(async (ctx, next) => {
-//   console.log(ctx);
-//   await next();
-// });
-
+app.use(response); // 返回体中间件
+app.use(cors()); // 设置允许跨域访问该服务.
+app.use(token); // token
 app.use(json());
 app.use(logger());
-app.use(cors()); // 设置允许跨域访问该服务.
 app.use(require('koa-static')(__dirname + '/public')); // 静态资源
-app.use(response); // 返回体
-app.use(token); // token
 app.use(utils); // 公共方法
+
+// 权限认证
+app.use(async (ctx, next) => {
+  const headerToken = ctx.request.header.token;
+  const queryToken = ctx.query.token;
+  if (headerToken || queryToken) {
+    if (headerToken && !ctx.checkToken(headerToken)) {
+      return ctx.error([0, '令牌已过期！']);
+    }
+    if (queryToken && !ctx.checkToken(queryToken)) {
+      return ctx.error([0, '令牌已过期！']);
+    }
+  } else {
+    return ctx.error([0, '令牌已过期！']);
+  }
+  await next();
+});
 
 app.use(
   views(__dirname + '/views', {

@@ -20,6 +20,7 @@ const key = crypto.scryptSync(PASSWORD, '盐值', 24);
 // 使用 `crypto.randomBytes()` 生成随机的 iv 而不是此处显示的静态的 iv。
 const iv = Buffer.alloc(16, 16); // 初始化向量。
 
+/* token再加密测试 */
 // const token = jwt.sign({ name: 'admin', id: 1 }, serect, { expiresIn: '1h' });
 // console.log(token);
 
@@ -59,7 +60,12 @@ exports.decryptToken = (ctx, tokens) => {
   const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
   // 使用相同的算法、密钥和 iv 进行加密
   let decrypted = decipher.update(tokens, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
+  try {
+    decrypted += decipher.final('utf8');
+  } catch (error) {
+    return false;
+  }
+  // decrypted += decipher.final('utf8');
   return decrypted;
 };
 /**
@@ -67,13 +73,6 @@ exports.decryptToken = (ctx, tokens) => {
  * @param String tokens
  */
 exports.checkToken = (ctx, tokens) => {
-  // tokens = tokens.trim().replace(/\s/g, '+');
-  // console.log(ctx.decryptRSAToken(tokens));
-  // if (ctx.decryptRSAToken(tokens) === null) {
-  //   return false;
-  // } else {
-  // const decoded = ctx.decryptRSAToken(tokens);
-
   // 解密
   const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
   // 使用相同的算法、密钥和 iv 进行加密
@@ -97,24 +96,24 @@ exports.decryptRSAToken = (ctx, tokens) => {
   return jwt.decode(ctx.decryptToken(tokens), serect);
 };
 
-class Check {
-  constructor(tokens) {
-    this.tokens = tokens; // 公有属性
-  }
+// class Check {
+//   constructor(tokens) {
+//     this.tokens = tokens; // 公有属性
+//   }
 
-  /** 方法说明
-   * @method token验证
-   * @for Check
-   * @param string tokens 再加密后的token
-   * @return Boolean
-   */
-  token(tokens) {
-    try {
-      crypto.createDecipheriv(ALGORITHM, key, iv);
-      return true;
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
-  }
-}
+//   /** 方法说明
+//    * @method token验证
+//    * @for Check
+//    * @param string tokens 再加密后的token
+//    * @return Boolean
+//    */
+//   token(tokens) {
+//     try {
+//       crypto.createDecipheriv(ALGORITHM, key, iv);
+//       return true;
+//     } catch (error) {
+//       console.log(error);
+//       return false;
+//     }
+//   }
+// }

@@ -28,30 +28,30 @@ module.exports = {
     errorLogger: {
       type: 'dateFile',
       filename: errorLogPath,
-      pattern: '-yyyy-MM-dd-hh.log',
+      pattern: '-yyyy-MM-dd.log',
       alwaysIncludePattern: true,
       encoding: 'utf-8',
-      maxLogSize: 1048576,
+      maxLogSize: 10485760,
       numBackups: 3,
       path: errorPath
     },
     resLogger: {
       type: 'dateFile',
       filename: responseLogPath,
-      pattern: '-yyyy-MM-dd-hh.log',
+      pattern: '-yyyy-MM-dd.log',
       alwaysIncludePattern: true,
       encoding: 'utf-8',
-      maxLogSize: 1048576, // 日志文件大小最大1M，单位字节
+      maxLogSize: 10485760, // 日志文件大小最大1M，单位字节
       numBackups: 3,
       path: responsePath
     },
     handleLogger: {
       type: 'dateFile',
       filename: handleLogPath,
-      pattern: '-yyyy-MM-dd-hh.log',
+      pattern: '-yyyy-MM-dd.log',
       alwaysIncludePattern: true,
       encoding: 'utf-8',
-      maxLogSize: 1048576,
+      maxLogSize: 10485760,
       numBackups: 3,
       path: handlePath
     }
