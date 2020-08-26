@@ -21,19 +21,19 @@ const key = crypto.scryptSync(PASSWORD, '盐值', 24);
 const iv = Buffer.alloc(16, 16); // 初始化向量。
 
 /* token再加密测试 */
-const token = jwt.sign({ name: 'admin', id: 1 }, serect, { expiresIn: '1h' });
-console.log(token);
+// const token = jwt.sign({ name: 'admin', id: 1 }, serect, { expiresIn: '1h' });
+// console.log(token);
 
-const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
-let encrypted = cipher.update(token, 'utf8', 'hex');
-encrypted += cipher.final('hex');
-console.log(encrypted);
+// const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
+// let encrypted = cipher.update(token, 'utf8', 'hex');
+// encrypted += cipher.final('hex');
+// console.log(encrypted);
 
-const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-// 使用相同的算法、密钥和 iv 进行加密
-let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-decrypted += decipher.final('utf8');
-console.log(decrypted);
+// const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
+// // 使用相同的算法、密钥和 iv 进行加密
+// let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+// decrypted += decipher.final('utf8');
+// console.log(decrypted);
 
 /**
  * token生成
