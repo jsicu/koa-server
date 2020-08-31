@@ -226,10 +226,4 @@ router.post('/register', async (ctx, next) => {
   ctx.success(ctx.session.emailCode);
 });
 
-// 导航栏获取
-router.get('/navigation', async (ctx, next) => {
-  console.log(ctx.request.header.token);
-  // console.log(ctx.session);
-  ctx.success(true);
-});
 module.exports = router;
