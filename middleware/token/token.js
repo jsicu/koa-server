@@ -95,25 +95,3 @@ exports.checkToken = (ctx, tokens) => {
 exports.decryptRSAToken = (ctx, tokens) => {
   return jwt.decode(ctx.decryptToken(tokens), serect);
 };
-
-// class Check {
-//   constructor(tokens) {
-//     this.tokens = tokens; // 公有属性
-//   }
-
-//   /** 方法说明
-//    * @method token验证
-//    * @for Check
-//    * @param string tokens 再加密后的token
-//    * @return Boolean
-//    */
-//   token(tokens) {
-//     try {
-//       crypto.createDecipheriv(ALGORITHM, key, iv);
-//       return true;
-//     } catch (error) {
-//       console.log(error);
-//       return false;
-//     }
-//   }
-// }
