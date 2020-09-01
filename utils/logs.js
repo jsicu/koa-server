@@ -86,7 +86,7 @@ const formatText = {
 };
 
 module.exports = {
-  // 封装普通日志
+  // 封装普通日志-未使用
   logInfo: function (info) {
     if (info) {
       consoleLogger.info(formatText.info(info));

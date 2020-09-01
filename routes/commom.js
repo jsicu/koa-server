@@ -12,7 +12,7 @@ const code = {
 router.get('/navigation', async (ctx, next) => {
   const sql = 'select * from route';
   const result = await mysql.query(sql);
-  const total = await mysql.query('SELECT count(id) FROM route;'); //total[0]['count(id)']
+  const total = await mysql.query('SELECT count(id) FROM route;'); // total[0]['count(id)']
   const table = new Table();
   ctx.success(table.tableTotal(undefined, result));
 });
