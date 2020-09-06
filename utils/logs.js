@@ -76,7 +76,7 @@ const formatText = {
     // 错误名称
     logText += 'err name: ' + err.name + '\n';
     // 错误信息
-    logText += 'err message: ' + err.message + '\n';
+    logText += 'err message: ' + (err.message || err) + '\n';
     // 错误详情
     logText += 'err stack: ' + err.stack + '\n';
     // 错误信息结束
@@ -86,7 +86,7 @@ const formatText = {
 };
 
 module.exports = {
-  // 封装普通日志
+  // 封装普通日志-未使用
   logInfo: function (info) {
     if (info) {
       consoleLogger.info(formatText.info(info));

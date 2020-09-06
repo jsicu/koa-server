@@ -41,7 +41,7 @@ const iv = Buffer.alloc(16, 16); // 初始化向量。
  */
 exports.getToken = (ctx, userinfo) => {
   // 创建token并导出
-  const token = jwt.sign(userinfo, serect, { expiresIn: '1h' });
+  const token = jwt.sign(userinfo, serect, { expiresIn: '4h' });
   const sql = `INSERT INTO online_token (token) VALUES ('${token}')`; // 存入token
   mysql.query(sql);
   // token加密

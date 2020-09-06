@@ -63,22 +63,27 @@ app.use(utils); // 公共方法
 
 // 权限认证
 app.use(async (ctx, next) => {
-  // 白名单接口
-  const WHITELIST = ['/security/publicKey', '/security/login'];
-  if (!WHITELIST.some(element => element === ctx.request.url)) {
-    const headerToken = ctx.request.header.token;
-    const queryToken = ctx.query.token;
-    if (headerToken || queryToken) {
-      if (headerToken && !ctx.checkToken(headerToken)) {
+  // 权限白名单 postman
+  const POSTMAN = ctx.request.header['user-agent'].slice(0, 7);
+  if (POSTMAN !== 'Postman') {
+    // 白名单接口
+    const WHITELIST = ['/security/publicKey', '/security/login'];
+    if (!WHITELIST.some(element => element === ctx.request.url)) {
+      const headerToken = ctx.request.header.token;
+      const queryToken = ctx.query.token;
+      if (headerToken || queryToken) {
+        if (headerToken && !ctx.checkToken(headerToken)) {
+          return ctx.error([0, '令牌已过期！']);
+        }
+        if (queryToken && !ctx.checkToken(queryToken)) {
+          return ctx.error([0, '令牌已过期！']);
+        }
+      } else {
         return ctx.error([0, '令牌已过期！']);
       }
-      if (queryToken && !ctx.checkToken(queryToken)) {
-        return ctx.error([0, '令牌已过期！']);
-      }
-    } else {
-      return ctx.error([0, '令牌已过期！']);
     }
   }
+
   await next();
 });
 

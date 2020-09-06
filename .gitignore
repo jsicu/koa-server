@@ -3,6 +3,7 @@ package-lock.json
 # 日志文件
 logs/
 backups/ 
+public/uploads/ 
 
 # Editor directories and files
 .idea
