@@ -129,7 +129,8 @@ router.post('/download', upload.single('file'), async ctx => {
     return ctx.error([0, '最大允许图片大小200k']);
   }
   // console.log('ctx.request.file', ctx.request.file);
-  // console.log('ctx.file', ctx.file);
+  // console.log('ctx.file', ctx.file); // 可以获取保存的图片信息
+  // TODO: 修改图片名称、账号对应多个图片功能、假删除功能、前台获取图片功能
   const base64Data = imgToBase64(path.join(process.cwd(), ctx.file.path)).replace(/^data:image\/\w+;base64,/, '');
   // eslint-disable-next-line no-undef
   const dataBuffer = Buffer.from(base64Data, 'base64');
