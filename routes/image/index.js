@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const qr = require('qr-image');
 const send = require('koa-send');
+const images = require('images');
 
 router.prefix('/image');
 
@@ -178,9 +179,120 @@ router.post('/upload', async ctx => {
   ctx.success(true);
 });
 
+const Jimp = require('jimp');
+/* 滑块验证 */
+// #region
+/**
+ * @swagger
+ * /image/verify/verify:
+ *   get:
+ *     summary: 滑块验证
+ *     description: 滑块验证
+ *     tags: [图片公共模块]
+ *     responses:
+ *       '200':
+ *         description: Ok
+ *         schema:
+ *           type: 'object'
+ *           properties:
+ *             code:
+ *               type: 'number'
+ *             data:
+ *               type: 'object'
+ *               description: 返回数据
+ *             message:
+ *               type: 'string'
+ *               description: 消息提示
+ *       '400':
+ *         description: 请求参数错误
+ *       '404':
+ *         description: not found
+ */
+// #endregion
+router.get('/verify/verify', async ctx => {
+  readFile(pwdPath, './out');
+  // images(pwdPath + '\\1.png') // Load image from file
+  //   //加载图像文件
+  //   .size(400) //Geometric scaling the image to 400 pixels width
+  //   //等比缩放图像到400像素宽
+  //   .draw(images('1.png'), 10, 10) //Drawn logo at coordinates (10,10)
+  //   //在(10,10)处绘制Logo
+  //   .save('output.jpg', {
+  //     //Save the image to a file, with the quality of 50
+  //     quality: 50 //保存图片到文件,图片质量为50
+  //   });crop(0, 0, 100, 1000)
+  const mask = await Jimp.read(path.join(pwdPath, 'timg.jpg'));
+  Jimp.read(path.join(pwdPath, 'timg.jpg'))
+    .then(function (lenna) {
+      lenna.displace(mask, 200).write(path.join(pwdPath, 'lena-small.jpg'));
+    })
+    .catch(function (err) {
+      console.error(err);
+    });
+  ctx.success(true);
+});
+
 module.exports = router;
 
 /* 方法 */
+function readFile(src, dst) {
+  //判断文件需要时间，则必须同步
+  if (fs.existsSync(src)) {
+    //读取文件夹
+    fs.readdir(src, function (err, files) {
+      if (err) {
+        throw err;
+      }
+      files.forEach(function (filePath) {
+        if (filePath === 'timg.jpg') {
+          //url+"/"+filename不能用/直接连接，Unix系统是”/“，Windows系统是”\“
+          var url = path.join(src, filePath),
+            dest = path.join(dst, filePath);
+          fs.stat(url, function (err, stats) {
+            if (err) throw err;
+            //是文件
+            if (stats.isFile()) {
+              //正则判定是图片
+              if (/.*\.(jpg|png|gif)$/i.test(url)) {
+                encoderImage(url, dest);
+              }
+              // } else if (stats.isDirectory()) {
+              //   exists(url, dest, readFile);
+            }
+          });
+        }
+      });
+    });
+  } else {
+    throw 'no files,no such!';
+  }
+}
+
+//这里处理文件跟复制有点相关，输出要检测文件是否存在，不存在要新建文件
+function exists(url, dest, callback) {
+  fs.exists(dest, function (exists) {
+    if (exists) {
+      callback && callback(url, dest);
+    } else {
+      //第二个参数目录权限 ，默认0777(读写权限)
+      fs.mkdir(dest, 0777, function (err) {
+        if (err) throw err;
+        callback && callback(url, dest);
+      });
+    }
+  });
+}
+
+function encoderImage(sourceImg, destImg) {
+  images(sourceImg) //加载图像文件
+    .size(1000) //等比缩放图像到1000像素宽
+    .draw(images(path.join(pwdPath, 'Yes.png')), 10, 10) //在(10,10)处绘制Logo
+    .save(path.join(pwdPath, destImg), {
+      quality: 500 //保存图片到文件,图片质量为50
+    });
+  images(400, 400).fill(255, 0, 0, 0.5).save(path.join(pwdPath, 'dist.jpg'));
+}
+
 const mimeType = require('mime-types'); // 获取文件类型
 function imgToBase64(file) {
   const filePath = path.resolve(file); // 原始文件地址

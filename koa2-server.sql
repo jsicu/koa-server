@@ -5,9 +5,7 @@ CREATE TABLE `log`  (
   `method` varchar(8) NULL COMMENT '请求方法',
   `url` varchar(128) NULL COMMENT '接口地址',
   `request_body` varchar(255) NULL COMMENT '请求体',
-  `operation
-
-` varchar(32) NULL COMMENT '操作类型',
+  `operation` varchar(32) NULL COMMENT '操作类型',
   `result` int(1) NULL COMMENT '请求结果',
   `ip` varchar(128) NULL COMMENT 'ip地址',
   `user-agent` varchar(255) NULL COMMENT '用户代理信息',

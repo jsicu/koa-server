@@ -63,9 +63,11 @@ app.use(utils); // 公共方法
 
 // 权限认证
 app.use(async (ctx, next) => {
-  // 权限白名单 postman
+  // 权限白名单 POSTMAN SWAGGER
   const POSTMAN = ctx.request.header['user-agent'].slice(0, 7);
-  if (POSTMAN !== 'Postman') {
+  const SWAGGER = ctx.request.header['referer'].slice(-7);
+  if (POSTMAN === 'Postman' || SWAGGER === 'swagger') {
+  } else {
     // 白名单接口
     const WHITELIST = ['/security/publicKey', '/security/login'];
     if (!WHITELIST.some(element => element === ctx.request.url)) {
@@ -83,7 +85,6 @@ app.use(async (ctx, next) => {
       }
     }
   }
-
   await next();
 });
 
