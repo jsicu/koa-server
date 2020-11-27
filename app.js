@@ -16,6 +16,8 @@ const image = require('./routes/image'); // 图片处理
 
 const response = require('./middleware/response');
 const token = require('./middleware/token');
+const myLog = require('./middleware/log');
+
 const utils = require('./utils');
 const mysql = require('./mysql');
 const logsUtil = require('./utils/logs.js'); // 日志文件
@@ -56,6 +58,7 @@ app.use(
 app.use(response); // 返回体中间件
 app.use(cors()); // 设置允许跨域访问该服务.
 app.use(token); // token
+app.use(myLog); // 日志中间件
 app.use(json());
 app.use(logger());
 app.use(require('koa-static')(__dirname + '/public')); // 静态资源
@@ -63,11 +66,14 @@ app.use(utils); // 公共方法
 
 // 权限认证
 app.use(async (ctx, next) => {
-  // 权限白名单 postman
+  // 权限白名单 POSTMAN SWAGGER
   const POSTMAN = ctx.request.header['user-agent'].slice(0, 7);
-  if (POSTMAN !== 'Postman') {
+  const SWAGGER = ctx.request.header['referer'].slice(-7);
+  if (POSTMAN === 'Postman' || SWAGGER === 'swagger') {
+  } else {
     // 白名单接口
-    const WHITELIST = ['/security/publicKey', '/security/login'];
+    const WHITELIST = ['/security/publicKey', '/security/login', '/image/verify/verify'];
+    console.log(ctx.request.url);
     if (!WHITELIST.some(element => element === ctx.request.url)) {
       const headerToken = ctx.request.header.token;
       const queryToken = ctx.query.token;
@@ -83,7 +89,6 @@ app.use(async (ctx, next) => {
       }
     }
   }
-
   await next();
 });
 
