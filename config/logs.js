@@ -21,6 +21,12 @@ const handlePath = '/handle';
 const handleFileName = 'handle';
 const handleLogPath = baseLogPath + handlePath + '/' + handleFileName;
 
+/* console记录日志 */
+// log、error等
+const consolePath = '/console';
+const consoleFileName = 'console';
+const consoleLoggerPath = baseLogPath + consolePath + '/' + consoleFileName;
+
 module.exports = {
   // 日志格式等设置
   appenders: {
@@ -54,6 +60,16 @@ module.exports = {
       maxLogSize: 10485760,
       numBackups: 3,
       path: handlePath
+    },
+    consoleLogger: {
+      type: 'dateFile',
+      filename: consoleLoggerPath,
+      pattern: '-yyyy-MM-dd.log',
+      alwaysIncludePattern: true,
+      encoding: 'utf-8',
+      maxLogSize: 10485760,
+      numBackups: 3,
+      path: consolePath
     }
   },
   // 供外部调用的名称和对应设置定义
@@ -62,7 +78,7 @@ module.exports = {
     resLogger: { appenders: ['resLogger'], level: 'info' },
     errorLogger: { appenders: ['errorLogger'], level: 'error' },
     handleLogger: { appenders: ['handleLogger'], level: 'all' },
-    http: { appenders: ['resLogger'], level: 'info' }
+    consoleLogger: { appenders: ['consoleLogger'], level: 'info' }
   },
   baseLogPath: baseLogPath
 };
