@@ -36,7 +36,7 @@ CREATE TABLE `uesr_history`  (
 
 CREATE TABLE `user`  (
   `id` int(10) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `name` varchar(32) NULL COMMENT '用户名',
+  `name` varchar(64) NULL COMMENT '用户名',
   `password` varchar(32) NULL COMMENT '密码',
   `create_time` datetime NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次修改时间',
@@ -47,3 +47,8 @@ CREATE TABLE `user`  (
 ALTER TABLE `log` ADD CONSTRAINT `user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`);
 ALTER TABLE `uesr_history` ADD CONSTRAINT `user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`);
 
+insert into route values(1,'首页', '/', '');
+insert into route values(2,'图像处理', '/home', '');
+insert into route values(21,'上传下载', 'home1', '');
+insert into route values(22,'头像更换', 'home3', '');
+insert into route values(3,'测试页', '/test', '');
