@@ -180,6 +180,7 @@ router.post('/upload', async ctx => {
 
 const Jimp = require('jimp');
 const { Image, createCanvas, loadImage } = require('canvas');
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms)); // 延时
 
 // loadImage(path.join(pwdPath, 'transparent.png')).then(image => {
 //   context.drawImage(image, 50, 0, 70, 70);
@@ -240,12 +241,6 @@ router.get('/verify/verify', async ctx => {
   };
   image.src = path.join(pwdPath, `/asset/${index}.jpg`);
 
-  // if (req.session) {
-  //   req.session.dragCaptcha = {
-  //     positionX,
-  //     positionY
-  //   };
-  // }
   let imgPath = pwdPath + '/asset/sliderBG.jpg';
   base64ToImg(imgPath, bgCanvas.toDataURL());
 
@@ -261,44 +256,9 @@ router.get('/verify/verify', async ctx => {
     .catch(function (err) {
       console.error(err);
     });
-  // 滑块透明化
-  const img = new Image();
-  img.onload = () => {
-    const width = 60,
-      height = 180;
-    const canvas = createCanvas(width, height);
-    const context = canvas.getContext('2d');
-    context.drawImage(img, 0, 0, width, height);
-    let imageData = context.getImageData(0, 0, width, height),
-      data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      // 得到 RGBA 通道的值
-      let r = data[i];
-      g = data[i + 1];
-      b = data[i + 2];
-      // 我们从最下面那张颜色生成器中可以看到在图片的右上角区域，有一小块在
-      // 肉眼的观察下基本都是白色的，所以我在这里把 RGB 值都在 245 以上的
-      // 的定义为白色
-      // 大家也可以自己定义的更精确，或者更宽泛一些
-      if ([r, g, b].every(v => v < 10 && v >= 0)) data[i + 3] = 0;
-    }
-    // 将修改后的代码复制回画布中
-    context.putImageData(imageData, 0, 0);
-    const imgP = path.join(pwdPath, 'slider.jpg'); // 输出图片路径
-    const base64 = canvas.toDataURL().replace(/^data:image\/\w+;base64,/, ''); //去掉图片base64码前面部分data:image/png;base64
-    const dataBuffer = Buffer.from(base64, 'base64'); //把base64码转成buffer对象，
-    // console.log('datauffer是否是Buffer对象：' + Buffer.isBuffer(dataBuffer));
-    fs.writeFileSync(imgP, dataBuffer, function (err) {
-      //用fs写入文件
-      if (err) {
-        console.log(err);
-      } else {
-        console.log('写入成功！');
-      }
-    });
-  };
-  img.src = path.join(pwdPath, '_slider.jpg');
-  // await transparent(60, 180, 10, 0, path.join(pwdPath, '_slider.jpg'), path.join(pwdPath, 'slider.jpg')); //, path.join(pwdPath, 'slider.jpg')
+
+  await delay(50);
+  await transparent(60, 180, 10, 0, path.join(pwdPath, '_slider.jpg'), path.join(pwdPath, 'slider.jpg')); //, path.join(pwdPath, 'slider.jpg')
 
   const slider = imgToBase64(path.join(pwdPath, 'slider.jpg'), 60, 320);
 
@@ -315,22 +275,10 @@ router.get('/verify/verify', async ctx => {
     .catch(function (err) {
       console.error(err);
     });
-  // const sliderBG = await imgToBase64(path.join(pwdPath, 'sliderBG.jpg'));
-  const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-  await delay(50);
-  const _canvas = createCanvas(320, 180);
-  const _canvasCtx = _canvas.getContext('2d');
-  const _image = new Image();
-  _image.onload = () => {
-    _canvasCtx.drawImage(_image, 0, 0, 320, 180);
-  };
-  _image.onerror = err => {
-    ctx.consoleLog('err', err);
-  };
-  _image.src = path.join(pwdPath, 'sliderBG.jpg');
 
-  const sliderBG = await _canvas.toDataURL();
-  // ctx.success({ positionX, positionY, dragPicWidth, dragPicHeight, dragPicWidth, dragPicHeight });
+  await delay(50);
+  const sliderBG = await imgToBase64(path.join(pwdPath, 'sliderBG.jpg'));
+
   ctx.success({
     sliderBG,
     slider,
@@ -404,12 +352,11 @@ function transparent(
     }
     // 将修改后的代码复制回画布中
     context.putImageData(imageData, 0, 0);
-    console.log(pwdPath);
     const path = outPath; // 输出图片路径
     const base64 = canvas.toDataURL().replace(/^data:image\/\w+;base64,/, ''); //去掉图片base64码前面部分data:image/png;base64
     const dataBuffer = Buffer.from(base64, 'base64'); //把base64码转成buffer对象，
     // console.log('datauffer是否是Buffer对象：' + Buffer.isBuffer(dataBuffer));
-    fs.writeFile(path, dataBuffer, function (err) {
+    fs.writeFileSync(path, dataBuffer, function (err) {
       //用fs写入文件
       if (err) {
         console.log(err);

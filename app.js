@@ -72,8 +72,7 @@ app.use(async (ctx, next) => {
   if (POSTMAN === 'Postman' || SWAGGER === 'swagger') {
   } else {
     // 白名单接口
-    const WHITELIST = ['/security/publicKey', '/security/login', '/image/verify/verify'];
-    console.log(ctx.request.url);
+    const WHITELIST = ['/security/publicKey', '/security/login'];
     if (!WHITELIST.some(element => element === ctx.request.url)) {
       const headerToken = ctx.request.header.token;
       const queryToken = ctx.query.token;
