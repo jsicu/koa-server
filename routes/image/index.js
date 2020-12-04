@@ -178,28 +178,22 @@ router.post('/upload', async ctx => {
   ctx.success(true);
 });
 
-const Jimp = require('jimp');
 const { Image, createCanvas, loadImage } = require('canvas');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms)); // 延时
 
-// loadImage(path.join(pwdPath, 'transparent.png')).then(image => {
-//   context.drawImage(image, 50, 0, 70, 70);
+const w = 40, // 正方形边长
+  r = 8, // 圆形直径
+  PI = Math.PI;
+const L = w + r * 2 + 3 // 滑块实际边长
 
-//   // console.log('<img src="' + canvas.toDataURL() + '" />');
-// });
-/* 滑块验证 */
 // #region
 /**
  * @swagger
- * /image/verify/verify:
+ * /image/verify/puzzle:
  *   get:
- *     summary: 滑块验证
+ *     summary: 滑块拼图
  *     description: 滑块验证
  *     tags: [图片公共模块]
- *     parameters:
- *       - name: width
- *         in: query # query/formData/path/body
- *         type: number
  *     responses:
  *       '200':
  *         description: Ok
@@ -220,73 +214,78 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms)); // 延时
  *         description: not found
  */
 // #endregion
-router.get('/verify/verify', async ctx => {
-  const bgWidth = 320;
-  const bgHeight = 180;
-  const dragPicWidth = 60;
-  const dragPicHeight = 45;
+router.get('/verify/puzzle', async ctx => {
+  const width = 320, height = 180;
   const index = Math.floor(Math.random() * 8);
-  const positionX = Math.floor(Math.random() * (bgWidth - dragPicWidth - 70) + 71); // 空白拼图的定位X
-  const positionY = Math.floor(Math.random() * (bgHeight - dragPicHeight - 70) + 71);
-  const bgCanvas = createCanvas(bgWidth, bgHeight);
-  const dragCanvas = createCanvas(dragPicWidth, dragPicHeight);
+  const bgCanvas = createCanvas(width, height);
+  const dragCanvas = createCanvas(width, height);
   const background = bgCanvas.getContext('2d');
   const dragPic = dragCanvas.getContext('2d');
 
   const image = new Image();
   image.onload = () => {
-    background.drawImage(image, 0, 0, bgWidth, bgHeight, 0, 0, bgWidth, bgHeight);
-    dragPic.drawImage(bgCanvas, positionX, positionY, dragPicWidth, dragPicHeight, 0, 0, dragPicWidth, dragPicHeight);
-    background.clearRect(positionX, positionY, dragPicWidth, dragPicHeight);
+    // 随机位置创建拼图形状
+    const X = getRandomNumberByRange(L + 10, width - (L + 10))
+    const Y = getRandomNumberByRange(10 + r * 2, height - (L + 10))
+    drawPath(background, X, Y, 'fill')
+    drawPath(dragPic, X, Y, 'clip')
+  
+    // 画入图片
+    background.drawImage(image, 0, 0, width, height)
+    dragPic.drawImage(image, 0, 0, width, height)
+  
+    // 提取滑块并放到最左边
+    const y = Y - r * 2 - 1
+    const ImageData = dragPic.getImageData(X - 3, y, L, L)
+    dragPic.putImageData(ImageData, 0, y)
+    dragPic.drawImage(image, 0, 0, 65, 180)
+
+  };
+  image.onerror = err => {
+    console.error(err);
   };
   image.src = path.join(pwdPath, `/asset/${index}.jpg`);
 
-  let imgPath = pwdPath + '/asset/sliderBG.jpg';
-  base64ToImg(imgPath, bgCanvas.toDataURL());
-
-  imgPath = pwdPath + '/asset/slider.jpg';
-  base64ToImg(imgPath, dragCanvas.toDataURL());
-
-  // 合成滑块图
-  let mask = await Jimp.read(path.join(pwdPath, '/asset/slider.jpg'));
-  await Jimp.read(path.join(pwdPath, '/asset/transparent.jpg'))
-    .then(img => {
-      return img.composite(mask, 0, positionY).writeAsync(path.join(pwdPath, '_slider.jpg'));
-    })
-    .catch(function (err) {
-      console.error(err);
-    });
-
-  await delay(50);
-  await transparent(60, 180, 10, 0, path.join(pwdPath, '_slider.jpg'), path.join(pwdPath, 'slider.jpg')); //, path.join(pwdPath, 'slider.jpg')
-
-  const slider = imgToBase64(path.join(pwdPath, 'slider.jpg'), 60, 320);
-
-  // 合成虚化后背景图
-  const border = await Jimp.read(path.join(pwdPath, '/asset/border.png'));
-  mask = await mask.blur(1);
-  await Jimp.read(path.join(pwdPath, '/asset/sliderBG.jpg'))
-    .then(img => {
-      img
-        .composite(border, positionX - 1, positionY - 1)
-        .composite(mask, positionX, positionY)
-        .writeAsync(path.join(pwdPath, 'sliderBG.jpg'));
-    })
-    .catch(function (err) {
-      console.error(err);
-    });
-
-  await delay(50);
-  const sliderBG = await imgToBase64(path.join(pwdPath, 'sliderBG.jpg'));
+  const sliderCanvas = createCanvas(65, 180);
+  const slider = sliderCanvas.getContext('2d');
+  const sliderImg = new Image()
+  sliderImg.onload=() =>{
+    slider.drawImage(sliderImg, 0, 0, 65, 180, 0, 0, 65, 180)
+  }
+  image.onerror = err => {
+    console.error(err);
+  };
+  sliderImg.src = dragCanvas.toDataURL();
 
   ctx.success({
-    sliderBG,
-    slider,
-    positionX
+    sliderBG: bgCanvas.toDataURL(),
+    slider: sliderCanvas.toDataURL(),
   });
 });
 
 module.exports = router;
+
+function drawPath (ctx, x, y, operation) {
+  ctx.beginPath()
+  ctx.moveTo(x, y)
+  ctx.arc(x + w / 2, y - r + 2, r, 0.72 * PI, 2.26 * PI)
+  ctx.lineTo(x + w, y)
+  ctx.arc(x + w + r - 2, y + w / 2, r, 1.21 * PI, 2.78 * PI)
+  ctx.lineTo(x + w, y + w)
+  ctx.lineTo(x, y + w)
+  ctx.arc(x + r - 2, y + w / 2, r + 0.4, 2.76 * PI, 1.24 * PI, true)
+  ctx.lineTo(x, y)
+  ctx.lineWidth = 2
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)'
+  ctx.stroke()
+  ctx.globalCompositeOperation = 'destination-over'
+  operation === 'fill'? ctx.fill() : ctx.clip()
+}
+
+function getRandomNumberByRange (start, end) {
+  return Math.round(Math.random() * (end - start) + start)
+}
 
 /**
  * @description base64转图片
@@ -306,69 +305,12 @@ function base64ToImg(imgPath, imgData) {
   }
 }
 
+const mimeType = require('mime-types'); // 获取文件类型
 /**
  * @description 图片转base64
- * @param [String] imgPath 图片路径
- * @param [Number] width 图片的宽
- * @param [Number] height 图片的高
+ * @param [String] file 图片路径
  * @return 图片base64数据
  */
-function imgToBase64(imgPath, width = 320, height = 180) {
-  const canvas = createCanvas(width, height);
-  const canvasCtx = canvas.getContext('2d');
-  const image = new Image();
-  image.onload = () => {
-    canvasCtx.drawImage(image, 0, 0, width, height);
-  };
-  image.src = imgPath;
-  return canvas.toDataURL();
-}
-
-function transparent(
-  width = 320,
-  height = 180,
-  max = 256,
-  min = 0,
-  inPath,
-  outPath = pwdPath + `/${new Date().getTime()}.jpg`
-) {
-  const img = new Image();
-  img.onload = () => {
-    const canvas = createCanvas(width, height);
-    const context = canvas.getContext('2d');
-    context.drawImage(img, 0, 0, width, height);
-    let imageData = context.getImageData(0, 0, width, height),
-      data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      // 得到 RGBA 通道的值
-      let r = data[i];
-      g = data[i + 1];
-      b = data[i + 2];
-      // 我们从最下面那张颜色生成器中可以看到在图片的右上角区域，有一小块在
-      // 肉眼的观察下基本都是白色的，所以我在这里把 RGB 值都在 245 以上的
-      // 的定义为白色
-      // 大家也可以自己定义的更精确，或者更宽泛一些
-      if ([r, g, b].every(v => v < max && v >= min)) data[i + 3] = 0;
-    }
-    // 将修改后的代码复制回画布中
-    context.putImageData(imageData, 0, 0);
-    const path = outPath; // 输出图片路径
-    const base64 = canvas.toDataURL().replace(/^data:image\/\w+;base64,/, ''); //去掉图片base64码前面部分data:image/png;base64
-    const dataBuffer = Buffer.from(base64, 'base64'); //把base64码转成buffer对象，
-    // console.log('datauffer是否是Buffer对象：' + Buffer.isBuffer(dataBuffer));
-    fs.writeFileSync(path, dataBuffer, function (err) {
-      //用fs写入文件
-      if (err) {
-        console.log(err);
-      } else {
-        console.log('写入成功！');
-      }
-    });
-  };
-  img.src = inPath;
-}
-
-const mimeType = require('mime-types'); // 获取文件类型
 function imgToBase64(file) {
   const filePath = path.resolve(file); // 原始文件地址
   const fileName = filePath.split('\\').slice(-1)[0].split('.'); // 提取文件名
