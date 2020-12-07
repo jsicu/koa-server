@@ -184,7 +184,7 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms)); // 延时
 const w = 40, // 正方形边长
   r = 8, // 圆形直径
   PI = Math.PI;
-const L = w + r * 2 + 3 // 滑块实际边长
+const L = w + r * 2 + 3; // 滑块实际边长
 
 // #region
 /**
@@ -215,7 +215,8 @@ const L = w + r * 2 + 3 // 滑块实际边长
  */
 // #endregion
 router.get('/verify/puzzle', async ctx => {
-  const width = 320, height = 180;
+  const width = 320,
+    height = 180;
   const index = Math.floor(Math.random() * 8);
   const bgCanvas = createCanvas(width, height);
   const dragCanvas = createCanvas(width, height);
@@ -225,21 +226,20 @@ router.get('/verify/puzzle', async ctx => {
   const image = new Image();
   image.onload = () => {
     // 随机位置创建拼图形状
-    const X = getRandomNumberByRange(L + 10, width - (L + 10))
-    const Y = getRandomNumberByRange(10 + r * 2, height - (L + 10))
-    drawPath(background, X, Y, 'fill')
-    drawPath(dragPic, X, Y, 'clip')
-  
-    // 画入图片
-    background.drawImage(image, 0, 0, width, height)
-    dragPic.drawImage(image, 0, 0, width, height)
-  
-    // 提取滑块并放到最左边
-    const y = Y - r * 2 - 1
-    const ImageData = dragPic.getImageData(X - 3, y, L, L)
-    dragPic.putImageData(ImageData, 0, y)
-    dragPic.drawImage(image, 0, 0, 65, 180)
+    const X = getRandomNumberByRange(L + 10, width - (L + 10));
+    const Y = getRandomNumberByRange(10 + r * 2, height - (L + 10));
+    drawPath(background, X, Y, 'fill');
+    drawPath(dragPic, X, Y, 'clip');
 
+    // 画入图片
+    background.drawImage(image, 0, 0, width, height);
+    dragPic.drawImage(image, 0, 0, width, height);
+
+    // 提取滑块并放到最左边
+    const y = Y - r * 2 - 1;
+    const ImageData = dragPic.getImageData(X - 3, y, L, L);
+    dragPic.putImageData(ImageData, 0, y);
+    dragPic.drawImage(image, 0, 0, 65, 180);
   };
   image.onerror = err => {
     console.error(err);
@@ -248,10 +248,10 @@ router.get('/verify/puzzle', async ctx => {
 
   const sliderCanvas = createCanvas(65, 180);
   const slider = sliderCanvas.getContext('2d');
-  const sliderImg = new Image()
-  sliderImg.onload=() =>{
-    slider.drawImage(sliderImg, 0, 0, 65, 180, 0, 0, 65, 180)
-  }
+  const sliderImg = new Image();
+  sliderImg.onload = () => {
+    slider.drawImage(sliderImg, 0, 0, 65, 180, 0, 0, 65, 180);
+  };
   image.onerror = err => {
     console.error(err);
   };
@@ -259,32 +259,116 @@ router.get('/verify/puzzle', async ctx => {
 
   ctx.success({
     sliderBG: bgCanvas.toDataURL(),
-    slider: sliderCanvas.toDataURL(),
+    slider: sliderCanvas.toDataURL()
+  });
+});
+
+// #region
+/**
+ * @swagger
+ * /image/verify/point:
+ *   get:
+ *     summary: 点击验证
+ *     description: 点击验证
+ *     tags: [图片公共模块]
+ *     responses:
+ *       '200':
+ *         description: Ok
+ *         schema:
+ *           type: 'object'
+ *           properties:
+ *             code:
+ *               type: 'number'
+ *             data:
+ *               type: 'object'
+ *               description: 返回数据
+ *             message:
+ *               type: 'string'
+ *               description: 消息提示
+ *       '400':
+ *         description: 请求参数错误
+ *       '404':
+ *         description: not found
+ */
+// #endregion
+router.get('/verify/point', async ctx => {
+  const { colorList, wordsList } = require('./validationData');
+
+  const width = 320,
+    height = 180;
+  const index = Math.floor(Math.random() * 4);
+  const bgCanvas = createCanvas(width, height);
+  const background = bgCanvas.getContext('2d');
+  const wIndex = Math.floor(Math.random() * wordsList.length - 7);
+  const words = wordsList.substring(wIndex, wIndex + 7);
+  const str = words.replace(/[\。|\，|\；|\、]/g, '').split('');
+  console.log(str.slice(0, 3));
+
+  const image = new Image();
+  image.onload = () => {
+    background.drawImage(image, 0, 0, width, height);
+    background.font = 'bold 22px Microsoft YaHei';
+    // 随机位置创建拼图形状
+    for (let i = 0; i < 7; i++) {
+      const X = getRandomNumberByRange(20, width - 20);
+      const Y = getRandomNumberByRange(20, height - 20);
+      const cIndex = Math.floor(Math.random() * 13);
+      const angle = getRandomNumberByRange(-90, 90);
+
+      background.translate(X, Y); // 将画布的原点移动到正中央
+      background.rotate((angle * PI) / 180);
+      // 文字颜色
+      background.fillStyle = colorList[cIndex];
+      // 文字在画布的位置
+      background.fillText(words[i], 0, 0);
+      background.rotate((-angle * PI) / 180);
+      background.translate(-X, -Y); // 将画布的原点移动到正中央
+    }
+  };
+  image.onerror = err => {
+    console.error(err);
+  };
+  image.src = path.join(pwdPath, `/asset/${index}.png`);
+
+  // base64ToImg(path.join(pwdPath, 'test.png'), bgCanvas.toDataURL());
+
+  ctx.success({
+    bgCanvas: bgCanvas.toDataURL(),
+    words: str.slice(0, 3).join(',')
   });
 });
 
 module.exports = router;
 
-function drawPath (ctx, x, y, operation) {
-  ctx.beginPath()
-  ctx.moveTo(x, y)
-  ctx.arc(x + w / 2, y - r + 2, r, 0.72 * PI, 2.26 * PI)
-  ctx.lineTo(x + w, y)
-  ctx.arc(x + w + r - 2, y + w / 2, r, 1.21 * PI, 2.78 * PI)
-  ctx.lineTo(x + w, y + w)
-  ctx.lineTo(x, y + w)
-  ctx.arc(x + r - 2, y + w / 2, r + 0.4, 2.76 * PI, 1.24 * PI, true)
-  ctx.lineTo(x, y)
-  ctx.lineWidth = 2
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)'
-  ctx.stroke()
-  ctx.globalCompositeOperation = 'destination-over'
-  operation === 'fill'? ctx.fill() : ctx.clip()
+/**
+ * 方法说明
+ * @method 绘制滑块拼图背景及滑块
+ * @param [Canvas] ctx 图片画布
+ * @param [Number] x 滑块X轴
+ * @param [Number] y 滑块y轴
+ * @param [String] operation 操作类型（是背景或是滑块）
+ * @return
+ */
+function drawPath(ctx, x, y, operation) {
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.arc(x + w / 2, y - r + 2, r, 0.72 * PI, 2.26 * PI);
+  ctx.lineTo(x + w, y);
+  ctx.arc(x + w + r - 2, y + w / 2, r, 1.21 * PI, 2.78 * PI);
+  ctx.lineTo(x + w, y + w);
+  ctx.lineTo(x, y + w);
+  ctx.arc(x + r - 2, y + w / 2, r + 0.4, 2.76 * PI, 1.24 * PI, true);
+  ctx.lineTo(x, y);
+  ctx.lineWidth = 2;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+  ctx.stroke();
+  ctx.globalCompositeOperation = 'destination-over';
+  operation === 'fill' ? ctx.fill() : ctx.clip();
 }
 
-function getRandomNumberByRange (start, end) {
-  return Math.round(Math.random() * (end - start) + start)
+function getRandomNumberByRange(start, end) {
+  return Math.round(Math.random() * (end - start) + start);
 }
 
 /**
