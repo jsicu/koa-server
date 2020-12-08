@@ -334,8 +334,51 @@ router.get('/verify/point', async ctx => {
 
   ctx.success({
     bgCanvas: bgCanvas.toDataURL(),
-    words: str.slice(0, 3).join(',')
+    words: str.slice(0, 3).join('、')
   });
+});
+
+// #region
+/**
+ * @swagger
+ * /image/check:
+ *   post:
+ *     summary: 验证
+ *     description: 滑块验证
+ *     tags: [图片公共模块]
+ *     parameters:
+ *       - name: type
+ *         description: 验证类型（滑块0或点击1）
+ *         in: formData
+ *         type: number
+ *       - name: captcha
+ *         description: 加密后验证数据
+ *         in: formData
+ *         required: true
+ *         type: string
+ *     responses:
+ *       '200':
+ *         description: Ok
+ *         schema:
+ *           type: 'object'
+ *           properties:
+ *             code:
+ *               type: 'number'
+ *             data:
+ *               type: 'object'
+ *               description: 返回数据
+ *             message:
+ *               type: 'string'
+ *               description: 消息提示
+ *       '400':
+ *         description: 请求参数错误
+ *       '404':
+ *         description: not found
+ */
+// #endregion
+router.post('/check', async ctx => {
+  const data = ctx.request.body;
+  ctx.success(data);
 });
 
 module.exports = router;
