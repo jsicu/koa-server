@@ -3,9 +3,10 @@ const router = require('koa-router')();
 const paramCheck = require('../utils/paramCheck');
 const Joi = require('joi'); // 参数校验
 
-const NodeRSA = require('node-rsa'); // rsa加密
-const key = new NodeRSA({ b: 512 });
-key.setOptions({ encryptionScheme: 'pkcs1' });
+// const NodeRSA = require('node-rsa'); // rsa加密
+// const key = new NodeRSA({ b: 512 });
+// key.setOptions({ encryptionScheme: 'pkcs1' });
+const { key } = require('../utils/encryption');
 
 router.prefix('/security');
 

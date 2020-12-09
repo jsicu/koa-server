@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const qr = require('qr-image');
 const send = require('koa-send');
+const Joi = require('joi'); // 参数校验
 
 router.prefix('/image');
 
@@ -181,10 +182,11 @@ router.post('/upload', async ctx => {
 const { Image, createCanvas, loadImage } = require('canvas');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms)); // 延时
 
-const w = 40, // 正方形边长
-  r = 8, // 圆形直径
-  PI = Math.PI;
+const w = 40; // 正方形边长
+const r = 8; // 圆形直径
+const PI = Math.PI;
 const L = w + r * 2 + 3; // 滑块实际边长
+let sliderLeft = 0; // 滑块移动距离
 
 // #region
 /**
@@ -215,8 +217,8 @@ const L = w + r * 2 + 3; // 滑块实际边长
  */
 // #endregion
 router.get('/verify/puzzle', async ctx => {
-  const width = 320,
-    height = 180;
+  const width = 320;
+  const height = 180;
   const index = Math.floor(Math.random() * 8);
   const bgCanvas = createCanvas(width, height);
   const dragCanvas = createCanvas(width, height);
@@ -227,6 +229,7 @@ router.get('/verify/puzzle', async ctx => {
   image.onload = () => {
     // 随机位置创建拼图形状
     const X = getRandomNumberByRange(L + 10, width - (L + 10));
+    sliderLeft = X - 3;
     const Y = getRandomNumberByRange(10 + r * 2, height - (L + 10));
     drawPath(background, X, Y, 'fill');
     drawPath(dragPic, X, Y, 'clip');
@@ -294,14 +297,14 @@ router.get('/verify/puzzle', async ctx => {
 router.get('/verify/point', async ctx => {
   const { colorList, wordsList } = require('./validationData');
 
-  const width = 320,
-    height = 180;
+  const width = 320;
+  const height = 180;
   const index = Math.floor(Math.random() * 4);
   const bgCanvas = createCanvas(width, height);
   const background = bgCanvas.getContext('2d');
   const wIndex = Math.floor(Math.random() * wordsList.length - 7);
   const words = wordsList.substring(wIndex, wIndex + 7);
-  const str = words.replace(/[\。|\，|\；|\、]/g, '').split('');
+  const str = words.replace(/[。|，|；|、]/g, '').split('');
   console.log(str.slice(0, 3));
 
   const image = new Image();
@@ -337,6 +340,8 @@ router.get('/verify/point', async ctx => {
     words: str.slice(0, 3).join('、')
   });
 });
+
+const { key } = require('../../utils/encryption');
 
 // #region
 /**
@@ -378,7 +383,26 @@ router.get('/verify/point', async ctx => {
 // #endregion
 router.post('/check', async ctx => {
   const data = ctx.request.body;
-  ctx.success(data);
+  if (!data.checkJson) return ctx.error([400, 'checkJson is required!']);
+
+  // const checkJson = Number(data.checkJson.replace(/\s+/g, '+')) + 4; // 防止公钥有空格存在
+  let checkJson = data.checkJson.replace(/\s+/g, '+'); // 防止公钥有空格存在
+
+  let result = false;
+  if (data.captchaType === 0 || data.captchaType) {
+    // 点击验证
+    checkJson = key.decrypt(checkJson, 'utf8');
+    console.log(checkJson);
+  } else {
+    // 滑块验证
+    /**
+     *  由于使用公用的key,所以每编译一次key就改变一次
+     *  导致解密时容易解密失败报错
+     */
+    checkJson = Number(key.decrypt(checkJson, 'utf8')) + 4; // 解密
+    Math.abs(checkJson - sliderLeft) < 4 ? (result = true) : (result = false);
+  }
+  ctx.success(result);
 });
 
 module.exports = router;
@@ -420,19 +444,20 @@ function getRandomNumberByRange(start, end) {
  * @param [String] imgData 图片base64数据
  */
 function base64ToImg(imgPath, imgData) {
-  const base64 = imgData.replace(/^data:image\/\w+;base64,/, ''); //去掉图片base64码前面部分data:image/png;base64
-  const dataBuffer = Buffer.from(base64, 'base64'); //把base64码转成buffer对象，
+  const base64 = imgData.replace(/^data:image\/\w+;base64,/, ''); // 去掉图片base64码前面部分data:image/png;base64
+  const dataBuffer = Buffer.from(base64, 'base64'); // 把base64码转成buffer对象，
   if (Buffer.isBuffer(dataBuffer)) {
-    fs.writeFileSync(imgPath, dataBuffer, function (err) {
-      //用fs写入文件
+    fs.writeFileSync(imgPath, dataBuffer, err => {
+      // 用fs写入文件
       if (err) console.log(err);
     });
   } else {
-    throw '非base数据！';
+    throw new Error('非base数据！');
   }
 }
 
 const mimeType = require('mime-types'); // 获取文件类型
+const { number } = require('joi');
 /**
  * @description 图片转base64
  * @param [String] file 图片路径
