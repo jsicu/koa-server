@@ -9,16 +9,19 @@ const cors = require('koa2-cors'); // 跨域中间件
 const session = require('koa-session');
 const koaSwagger = require('koa2-swagger-ui');
 
+// 路由
 const index = require('./routes/index');
 const commom = require('./routes/commom'); // 通用服务
 const security = require('./routes/security'); // 登陆认证
 const image = require('./routes/image'); // 图片处理
 
+// 中间件
 const response = require('./middleware/response');
 const token = require('./middleware/token');
 const myLog = require('./middleware/log');
+const utils = require('./middleware');
 
-const utils = require('./utils');
+// 公告方法
 const mysql = require('./mysql');
 const logsUtil = require('./utils/logs.js'); // 日志文件
 

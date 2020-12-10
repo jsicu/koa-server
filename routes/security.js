@@ -2,6 +2,7 @@ const mysql = require('../mysql');
 const router = require('koa-router')();
 const paramCheck = require('../utils/paramCheck');
 const Joi = require('joi'); // 参数校验
+const fs = require('fs'); // 引入fs模块
 
 // const NodeRSA = require('node-rsa'); // rsa加密
 // const key = new NodeRSA({ b: 512 });

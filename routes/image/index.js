@@ -1,7 +1,5 @@
 // const mysql = require('../../mysql');
 const router = require('koa-router')();
-// const paramCheck = require('../utils/paramCheck');
-const utils = require('../../utils/');
 const fs = require('fs');
 const path = require('path');
 const qr = require('qr-image');
@@ -12,6 +10,8 @@ router.prefix('/image');
 
 // 日志根目录
 const pwdPath = path.resolve(__dirname);
+let sliderLeft = 0; // 滑块移动距离
+let position = []; // 点击文字坐标位置
 
 // #region
 /**
@@ -186,7 +186,6 @@ const w = 40; // 正方形边长
 const r = 8; // 圆形直径
 const PI = Math.PI;
 const L = w + r * 2 + 3; // 滑块实际边长
-let sliderLeft = 0; // 滑块移动距离
 
 // #region
 /**
@@ -297,6 +296,7 @@ router.get('/verify/puzzle', async ctx => {
 router.get('/verify/point', async ctx => {
   const { colorList, wordsList } = require('./validationData');
 
+  position = [];
   const width = 320;
   const height = 180;
   const index = Math.floor(Math.random() * 4);
@@ -304,20 +304,30 @@ router.get('/verify/point', async ctx => {
   const background = bgCanvas.getContext('2d');
   const wIndex = Math.floor(Math.random() * wordsList.length - 7);
   const words = wordsList.substring(wIndex, wIndex + 7);
-  const str = words.replace(/[。|，|；|、]/g, '').split('');
-  console.log(str.slice(0, 3));
+  const str = words
+    .replace(/[。|，|；|、|\n]/g, '')
+    .split('')
+    .slice(0, 3);
+  console.log(words);
+  console.log(str);
 
   const image = new Image();
   image.onload = () => {
     background.drawImage(image, 0, 0, width, height);
     background.font = 'bold 22px Microsoft YaHei';
+    let len = 0;
     // 随机位置创建拼图形状
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < words.length; i++) {
       const X = getRandomNumberByRange(20, width - 20);
       const Y = getRandomNumberByRange(20, height - 20);
       const cIndex = Math.floor(Math.random() * 13);
       const angle = getRandomNumberByRange(-90, 90);
 
+      if (words[i] == str[len] && len <= str.length) {
+        position.push({ X, Y, word: str[len], angle });
+        len++;
+      }
+      // console.log(X, Y);
       background.translate(X, Y); // 将画布的原点移动到正中央
       background.rotate((angle * PI) / 180);
       // 文字颜色
@@ -333,11 +343,13 @@ router.get('/verify/point', async ctx => {
   };
   image.src = path.join(pwdPath, `/asset/${index}.png`);
 
-  // base64ToImg(path.join(pwdPath, 'test.png'), bgCanvas.toDataURL());
+  base64ToImg(path.join(pwdPath, 'test.png'), bgCanvas.toDataURL());
 
   ctx.success({
     bgCanvas: bgCanvas.toDataURL(),
-    words: str.slice(0, 3).join('、')
+    words: str.join('、'),
+    size: { width, height },
+    position
   });
 });
 
@@ -389,9 +401,37 @@ router.post('/check', async ctx => {
   let checkJson = data.checkJson.replace(/\s+/g, '+'); // 防止公钥有空格存在
 
   let result = false;
+  const R = 16; // 根据字体大小计算得到：22px R = Math.round(2 * 11^2)
   if (data.captchaType === 0 || data.captchaType) {
     // 点击验证
-    checkJson = key.decrypt(checkJson, 'utf8');
+    // checkJson = key.decrypt(checkJson, 'utf8');
+    checkJson = JSON.parse(checkJson);
+    for (const i in position) {
+      const element = position[i];
+      const radian = ((element.angle + 45) * PI) / 180;
+      if (element.angle > 45) {
+        position[i].X -= Math.round(R * Math.cos(radian));
+        position[i].Y += Math.round(R * Math.sin(radian));
+      } else if (element.angle < -45) {
+        position[i].X += Math.round(R * Math.sin(radian));
+        position[i].Y -= Math.round(R * Math.cos(radian));
+      } else {
+        position[i].X += Math.round(R * Math.sin(radian));
+        position[i].Y -= Math.round(R * Math.cos(radian));
+      }
+      const dx = Math.abs(position[i].X - checkJson[i].x);
+      const dy = Math.abs(position[i].Y - checkJson[i].y);
+      const distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+      //  TODO: 还有错
+      if (distance > 20) {
+        result = false;
+      } else if (i == position.length - 1) {
+        result = true;
+      }
+      console.log(result);
+      console.log(distance);
+    }
+    console.log(position);
     console.log(checkJson);
   } else {
     // 滑块验证
