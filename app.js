@@ -71,6 +71,7 @@ app.use(utils); // 公共方法
 app.use(async (ctx, next) => {
   // 权限白名单 POSTMAN SWAGGER
   const POSTMAN = ctx.request.header['user-agent'].slice(0, 7);
+  // eslint-disable-next-line dot-notation
   const SWAGGER = ctx.request.header['referer'].slice(-7);
   if (POSTMAN === 'Postman' || SWAGGER === 'swagger') {
   } else {
@@ -87,7 +88,7 @@ app.use(async (ctx, next) => {
           return ctx.error([0, '令牌已过期！']);
         }
       } else {
-        return ctx.error([0, '令牌已过期！']);
+        return ctx.error([0, 'token检验未通过！']);
       }
     }
   }

@@ -305,7 +305,7 @@ router.get('/verify/point', async ctx => {
   const wIndex = Math.floor(Math.random() * wordsList.length - 7);
   const words = wordsList.substring(wIndex, wIndex + 7);
   const str = words
-    .replace(/[。|，|；|、|\n]/g, '')
+    .replace(/[。|，|；|、|\n|？]/g, '')
     .split('')
     .slice(0, 3);
   console.log(words);
@@ -343,7 +343,7 @@ router.get('/verify/point', async ctx => {
   };
   image.src = path.join(pwdPath, `/asset/${index}.png`);
 
-  base64ToImg(path.join(pwdPath, 'test.png'), bgCanvas.toDataURL());
+  // base64ToImg(path.join(pwdPath, 'test.png'), bgCanvas.toDataURL());
 
   ctx.success({
     bgCanvas: bgCanvas.toDataURL(),
@@ -351,10 +351,13 @@ router.get('/verify/point', async ctx => {
     size: { width, height },
     position
   });
+
+  const headerToken = ctx.request.header.token;
+  // const userId = ctx.decryptRSAToken(headerToken).id
+  console.log(ctx.decryptRSAToken(headerToken));
+  // TODO: 验证信息存储
 });
-
 const { key } = require('../../utils/encryption');
-
 // #region
 /**
  * @swagger
@@ -423,8 +426,8 @@ router.post('/check', async ctx => {
       const dy = Math.abs(position[i].Y - checkJson[i].y);
       const distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
       //  TODO: 还有错
-      if (distance > 20) {
-        result = false;
+      if (distance > 18) {
+        return ctx.success(false);
       } else if (i == position.length - 1) {
         result = true;
       }

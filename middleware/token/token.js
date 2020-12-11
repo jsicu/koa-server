@@ -4,8 +4,8 @@ const NodeRSA = require('node-rsa');
 const path = require('path');
 const crypto = require('crypto');
 
-// const serect = 'token'; // 密钥，不能丢
-const serect = new NodeRSA({ b: 512 }).exportKey('public');
+// const secret = 'token'; // 密钥，不能丢
+const secret = new NodeRSA({ b: 512 }).exportKey('public');
 const mysql = require('../../mysql');
 
 // 获取公钥和私钥
@@ -21,7 +21,7 @@ const key = crypto.scryptSync(PASSWORD, '盐值', 24);
 const iv = Buffer.alloc(16, 16); // 初始化向量。
 
 /* token再加密测试 */
-// const token = jwt.sign({ name: 'admin', id: 1 }, serect, { expiresIn: '1h' });
+// const token = jwt.sign({ name: 'admin', id: 1 }, secret, { expiresIn: '1h' });
 // console.log(token);
 
 // const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
@@ -37,12 +37,12 @@ const iv = Buffer.alloc(16, 16); // 初始化向量。
 
 /**
  * token生成
- * @param Object userinfo
+ * @param Object userInfo
  */
-exports.getToken = (ctx, userinfo) => {
+exports.getToken = (ctx, userInfo) => {
   // 创建token并导出
-  const token = jwt.sign(userinfo, serect, { expiresIn: '4h' });
-  const sql = `INSERT INTO online_token (token) VALUES ('${token}')`; // 存入token
+  const token = jwt.sign(userInfo, secret, { expiresIn: '4h' });
+  const sql = `INSERT INTO online_token (token, user_id) VALUES ('${token}', '${userInfo.id}')`; // 存入token
   mysql.query(sql);
   // token加密
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
@@ -83,7 +83,7 @@ exports.checkToken = (ctx, tokens) => {
     return false;
   }
   // decrypted += decipher.final('utf8');
-  const decoded = jwt.decode(decrypted, serect);
+  const decoded = jwt.decode(decrypted, secret);
   return !(decoded && decoded.exp <= new Date() / 1000);
   // }
 };
@@ -93,5 +93,5 @@ exports.checkToken = (ctx, tokens) => {
  * @param String tokens
  */
 exports.decryptRSAToken = (ctx, tokens) => {
-  return jwt.decode(ctx.decryptToken(tokens), serect);
+  return jwt.decode(ctx.decryptToken(tokens), secret);
 };
