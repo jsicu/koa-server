@@ -88,6 +88,10 @@ router.post('/login', async (ctx, next) => {
  *         description: 请求参数错误
  *       '404':
  *         description: not found
+ *     security:
+ *       - token: {}
+ *       - server_auth:
+ *         - token
  */
 // #endregion
 router.get('/publicKey', async (ctx, next) => {

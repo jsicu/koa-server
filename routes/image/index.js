@@ -47,7 +47,6 @@ let position = []; // 点击文字坐标位置
  *         description: not found
  */
 // #endregion
-
 router.get('/:id', (ctx, next) => {
   // console.log(ctx.params);
   const obj = ctx.params;
@@ -64,6 +63,18 @@ router.get('/:id', (ctx, next) => {
   //   if (err) throw err;
   //   console.log('文件已被删除');
   // });
+});
+
+// oauth2授权服务
+router.post('/oauth', (ctx, next) => {
+  ctx.success({
+    access_token: '36034ff7-7eea-4935-a3b7-5787d7a65827',
+    token_type: 'bearer',
+    grant_type: 'password',
+    refresh_token: '4baea735-3c0d-4dfd-b826-91c6772a0962',
+    expires_in: 36931,
+    scope: 'token'
+  });
 });
 
 // 图片下载
