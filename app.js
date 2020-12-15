@@ -72,8 +72,8 @@ app.use(async (ctx, next) => {
   // 权限白名单 POSTMAN SWAGGER
   const POSTMAN = ctx.request.header['user-agent'].slice(0, 7);
   // eslint-disable-next-line dot-notation
-  const SWAGGER = ctx.request.header['referer'].slice(-7);
-  if (POSTMAN === 'Postman' || SWAGGER === 'swagger') {
+  // const SWAGGER = ctx.request.header['referer'].slice(-7);
+  if (POSTMAN === 'Postman') {
   } else {
     // 白名单接口
     const WHITELIST = ['/security/publicKey', '/security/login'];

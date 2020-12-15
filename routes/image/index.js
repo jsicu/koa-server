@@ -1,4 +1,4 @@
-// const mysql = require('../../mysql');
+const mysql = require('../../mysql');
 const router = require('koa-router')();
 const fs = require('fs');
 const path = require('path');
@@ -15,7 +15,7 @@ let position = []; // 点击文字坐标位置
 
 // #region
 /**
- * @swagger
+ * # @swagger
  * /image/{id}:
  *   get:
  *     summary: Returns a list of users.
@@ -47,23 +47,23 @@ let position = []; // 点击文字坐标位置
  *         description: not found
  */
 // #endregion
-router.get('/:id', (ctx, next) => {
-  // console.log(ctx.params);
-  const obj = ctx.params;
-  const url = path.join(pwdPath, `assets/${obj.id}.png`);
-  const img = qr.image(obj.id, { type: 'png' });
-  img.pipe(fs.createWriteStream(url));
-  // 验证文件系统是否存在
-  const res = ctx.checkPath(url);
-  if (res) {
-    ctx.success(true);
-  }
-  //  删除文件
-  // fs.unlink(url, err => {
-  //   if (err) throw err;
-  //   console.log('文件已被删除');
-  // });
-});
+// router.get('/:id', (ctx, next) => {
+//   // console.log(ctx.params);
+//   const obj = ctx.params;
+//   const url = path.join(pwdPath, `assets/${obj.id}.png`);
+//   const img = qr.image(obj.id, { type: 'png' });
+//   img.pipe(fs.createWriteStream(url));
+//   // 验证文件系统是否存在
+//   const res = ctx.checkPath(url);
+//   if (res) {
+//     ctx.success(true);
+//   }
+//   //  删除文件
+//   // fs.unlink(url, err => {
+//   //   if (err) throw err;
+//   //   console.log('文件已被删除');
+//   // });
+// });
 
 // oauth2授权服务
 router.post('/oauth', (ctx, next) => {
@@ -201,11 +201,16 @@ const L = w + r * 2 + 3; // 滑块实际边长
 // #region
 /**
  * @swagger
- * /image/verify/puzzle:
+ * /image/verify:
  *   get:
- *     summary: 滑块拼图
- *     description: 滑块验证
+ *     summary: 验证
+ *     description: 验证功能
  *     tags: [图片公共模块]
+ *     parameters:
+ *       - name: type
+ *         description: 验证类型（滑块0或点击1）
+ *         in: query
+ *         type: number
  *     responses:
  *       '200':
  *         description: Ok
@@ -224,150 +229,123 @@ const L = w + r * 2 + 3; // 滑块实际边长
  *         description: 请求参数错误
  *       '404':
  *         description: not found
+ *     security:
+ *       - token: {}
  */
 // #endregion
-router.get('/verify/puzzle', async ctx => {
-  const width = 320;
-  const height = 180;
-  const index = Math.floor(Math.random() * 8);
-  const bgCanvas = createCanvas(width, height);
-  const dragCanvas = createCanvas(width, height);
-  const background = bgCanvas.getContext('2d');
-  const dragPic = dragCanvas.getContext('2d');
+router.get('/verify', async ctx => {
+  console.log(ctx.request.query);
+  const { type = 0 } = ctx.request.query;
+  if (Number(type)) {
+    const { colorList, wordsList } = require('./validationData');
 
-  const image = new Image();
-  image.onload = () => {
-    // 随机位置创建拼图形状
-    const X = getRandomNumberByRange(L + 10, width - (L + 10));
-    sliderLeft = X - 3;
-    const Y = getRandomNumberByRange(10 + r * 2, height - (L + 10));
-    drawPath(background, X, Y, 'fill');
-    drawPath(dragPic, X, Y, 'clip');
+    position = [];
+    const width = 320;
+    const height = 180;
+    const index = Math.floor(Math.random() * 4);
+    const bgCanvas = createCanvas(width, height);
+    const background = bgCanvas.getContext('2d');
+    const wIndex = Math.floor(Math.random() * wordsList.length - 7);
+    const words = wordsList.substring(wIndex, wIndex + 7);
+    const str = words
+      .replace(/[。|，|；|、|\n|？]/g, '')
+      .split('')
+      .slice(0, 3);
 
-    // 画入图片
-    background.drawImage(image, 0, 0, width, height);
-    dragPic.drawImage(image, 0, 0, width, height);
+    const image = new Image();
+    image.onload = () => {
+      background.drawImage(image, 0, 0, width, height);
+      background.font = 'bold 22px Microsoft YaHei';
+      let len = 0;
+      // 随机位置创建拼图形状
+      for (let i = 0; i < words.length; i++) {
+        const X = getRandomNumberByRange(20, width - 20);
+        const Y = getRandomNumberByRange(20, height - 20);
+        const cIndex = Math.floor(Math.random() * 13);
+        const angle = getRandomNumberByRange(-90, 90);
 
-    // 提取滑块并放到最左边
-    const y = Y - r * 2 - 1;
-    const ImageData = dragPic.getImageData(X - 3, y, L, L);
-    dragPic.putImageData(ImageData, 0, y);
-    dragPic.drawImage(image, 0, 0, 65, 180);
-  };
-  image.onerror = err => {
-    console.error(err);
-  };
-  image.src = path.join(pwdPath, `/asset/${index}.jpg`);
-
-  const sliderCanvas = createCanvas(65, 180);
-  const slider = sliderCanvas.getContext('2d');
-  const sliderImg = new Image();
-  sliderImg.onload = () => {
-    slider.drawImage(sliderImg, 0, 0, 65, 180, 0, 0, 65, 180);
-  };
-  image.onerror = err => {
-    console.error(err);
-  };
-  sliderImg.src = dragCanvas.toDataURL();
-
-  ctx.success({
-    sliderBG: bgCanvas.toDataURL(),
-    slider: sliderCanvas.toDataURL()
-  });
-});
-
-// #region
-/**
- * @swagger
- * /image/verify/point:
- *   get:
- *     summary: 点击验证
- *     description: 点击验证
- *     tags: [图片公共模块]
- *     responses:
- *       '200':
- *         description: Ok
- *         schema:
- *           type: 'object'
- *           properties:
- *             code:
- *               type: 'number'
- *             data:
- *               type: 'object'
- *               description: 返回数据
- *             message:
- *               type: 'string'
- *               description: 消息提示
- *       '400':
- *         description: 请求参数错误
- *       '404':
- *         description: not found
- */
-// #endregion
-router.get('/verify/point', async ctx => {
-  const { colorList, wordsList } = require('./validationData');
-
-  position = [];
-  const width = 320;
-  const height = 180;
-  const index = Math.floor(Math.random() * 4);
-  const bgCanvas = createCanvas(width, height);
-  const background = bgCanvas.getContext('2d');
-  const wIndex = Math.floor(Math.random() * wordsList.length - 7);
-  const words = wordsList.substring(wIndex, wIndex + 7);
-  const str = words
-    .replace(/[。|，|；|、|\n|？]/g, '')
-    .split('')
-    .slice(0, 3);
-  console.log(words);
-  console.log(str);
-
-  const image = new Image();
-  image.onload = () => {
-    background.drawImage(image, 0, 0, width, height);
-    background.font = 'bold 22px Microsoft YaHei';
-    let len = 0;
-    // 随机位置创建拼图形状
-    for (let i = 0; i < words.length; i++) {
-      const X = getRandomNumberByRange(20, width - 20);
-      const Y = getRandomNumberByRange(20, height - 20);
-      const cIndex = Math.floor(Math.random() * 13);
-      const angle = getRandomNumberByRange(-90, 90);
-
-      if (words[i] == str[len] && len <= str.length) {
-        position.push({ X, Y, word: str[len], angle });
-        len++;
+        if (words[i] == str[len] && len <= str.length) {
+          position.push({ X, Y, word: str[len], angle });
+          len++;
+        }
+        // console.log(X, Y);
+        background.translate(X, Y); // 将画布的原点移动到正中央
+        background.rotate((angle * PI) / 180);
+        // 文字颜色
+        background.fillStyle = colorList[cIndex];
+        // 文字在画布的位置
+        background.fillText(words[i], 0, 0);
+        background.rotate((-angle * PI) / 180);
+        background.translate(-X, -Y); // 将画布的原点移动到正中央
       }
-      // console.log(X, Y);
-      background.translate(X, Y); // 将画布的原点移动到正中央
-      background.rotate((angle * PI) / 180);
-      // 文字颜色
-      background.fillStyle = colorList[cIndex];
-      // 文字在画布的位置
-      background.fillText(words[i], 0, 0);
-      background.rotate((-angle * PI) / 180);
-      background.translate(-X, -Y); // 将画布的原点移动到正中央
-    }
-  };
-  image.onerror = err => {
-    console.error(err);
-  };
-  image.src = path.join(pwdPath, `/asset/${index}.png`);
+    };
+    image.onerror = err => {
+      console.error(err);
+    };
+    image.src = path.join(pwdPath, `/asset/${index}.png`);
 
-  // base64ToImg(path.join(pwdPath, 'test.png'), bgCanvas.toDataURL());
+    ctx.success({
+      bgCanvas: bgCanvas.toDataURL(),
+      words: str.join('、'),
+      size: { width, height }
+    });
+  } else {
+    const width = 320;
+    const height = 180;
+    const index = Math.floor(Math.random() * 8);
+    const bgCanvas = createCanvas(width, height);
+    const dragCanvas = createCanvas(width, height);
+    const background = bgCanvas.getContext('2d');
+    const dragPic = dragCanvas.getContext('2d');
 
-  ctx.success({
-    bgCanvas: bgCanvas.toDataURL(),
-    words: str.join('、'),
-    size: { width, height },
-    position
-  });
+    const image = new Image();
+    image.onload = () => {
+    // 随机位置创建拼图形状
+      const X = getRandomNumberByRange(L + 10, width - (L + 10));
+      position = X - 3;
+      const Y = getRandomNumberByRange(10 + r * 2, height - (L + 10));
+      drawPath(background, X, Y, 'fill');
+      drawPath(dragPic, X, Y, 'clip');
 
+      // 画入图片
+      background.drawImage(image, 0, 0, width, height);
+      dragPic.drawImage(image, 0, 0, width, height);
+
+      // 提取滑块并放到最左边
+      const y = Y - r * 2 - 1;
+      const ImageData = dragPic.getImageData(X - 3, y, L, L);
+      dragPic.putImageData(ImageData, 0, y);
+      dragPic.drawImage(image, 0, 0, 65, 180);
+    };
+    image.onerror = err => {
+      console.error(err);
+    };
+    image.src = path.join(pwdPath, `/asset/${index}.jpg`);
+
+    const sliderCanvas = createCanvas(65, 180);
+    const slider = sliderCanvas.getContext('2d');
+    const sliderImg = new Image();
+    sliderImg.onload = () => {
+      slider.drawImage(sliderImg, 0, 0, 65, 180, 0, 0, 65, 180);
+    };
+    image.onerror = err => {
+      console.error(err);
+    };
+    sliderImg.src = dragCanvas.toDataURL();
+
+    ctx.success({
+      sliderBG: bgCanvas.toDataURL(),
+      slider: sliderCanvas.toDataURL()
+    });
+  }
   const headerToken = ctx.request.header.token;
-  // const userId = ctx.decryptRSAToken(headerToken).id
-  console.log(ctx.decryptRSAToken(headerToken));
-  // TODO: 验证信息存储
+  const token = ctx.decryptRSAToken(headerToken);
+  let sql = `DELETE FROM captcha WHERE user_id = '${token.id}' and type='${type}'`;
+  await mysql.query(sql);
+  sql = `INSERT INTO captcha (type, user_id, check_json) VALUES ('${type}', '${token.id}', '${JSON.stringify(position)}')`;
+  await mysql.query(sql);
 });
+
 const { key } = require('../../utils/encryption');
 // #region
 /**
@@ -405,21 +383,30 @@ const { key } = require('../../utils/encryption');
  *         description: 请求参数错误
  *       '404':
  *         description: not found
+ *     security:
+ *       - token: {}
  */
 // #endregion
 router.post('/check', async ctx => {
   const data = ctx.request.body;
   if (!data.checkJson) return ctx.error([400, 'checkJson is required!']);
 
-  // const checkJson = Number(data.checkJson.replace(/\s+/g, '+')) + 4; // 防止公钥有空格存在
+  const headerToken = ctx.request.header.token;
+  const token = ctx.decryptRSAToken(headerToken);
+
   let checkJson = data.checkJson.replace(/\s+/g, '+'); // 防止公钥有空格存在
 
   let result = false;
   const R = 16; // 根据字体大小计算得到：22px R = Math.round(2 * 11^2)
   if (data.captchaType === 0 || data.captchaType) {
     // 点击验证
-    // checkJson = key.decrypt(checkJson, 'utf8');
+    // checkJson = key.decrypt(checkJson, 'utf8'); // 解密，需前端配合加密
     checkJson = JSON.parse(checkJson);
+    const sql = `select * from captcha where user_id='${token.id}' and type='1'`;
+    const sqlResult = await mysql.query(sql);
+    position = JSON.parse(sqlResult[0].check_json);
+    // console.log(await mysql.query(sql));
+
     for (const i in position) {
       const element = position[i];
       const radian = ((element.angle + 45) * PI) / 180;
@@ -436,24 +423,25 @@ router.post('/check', async ctx => {
       const dx = Math.abs(position[i].X - checkJson[i].x);
       const dy = Math.abs(position[i].Y - checkJson[i].y);
       const distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-      //  TODO: 还有错
       if (distance > 18) {
         return ctx.success(false);
       } else if (i == position.length - 1) {
         result = true;
       }
-      console.log(result);
-      console.log(distance);
     }
-    console.log(position);
-    console.log(checkJson);
   } else {
     // 滑块验证
     /**
      *  由于使用公用的key,所以每编译一次key就改变一次
      *  导致解密时容易解密失败报错
      */
-    checkJson = Number(key.decrypt(checkJson, 'utf8')) + 4; // 解密
+    const sql = `select * from captcha where user_id='${token.id}' and type='0'`;
+    const sqlResult = await mysql.query(sql);
+    sliderLeft = Number(sqlResult[0].check_json);
+    console.log(sliderLeft);
+
+    // checkJson = key.decrypt(checkJson, 'utf8'); // 解密,需前端配合加密
+    checkJson = Number(checkJson) + 4;
     Math.abs(checkJson - sliderLeft) < 4 ? (result = true) : (result = false);
   }
   ctx.success(result);

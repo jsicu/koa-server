@@ -37,11 +37,11 @@ const iv = Buffer.alloc(16, 16); // 初始化向量。
 
 /**
  * token生成
- * @param Object userInfo
+ * @param Object userInfoh
  */
 exports.getToken = (ctx, userInfo) => {
   // 创建token并导出
-  const token = jwt.sign(userInfo, secret, { expiresIn: '4h' });
+  const token = jwt.sign(userInfo, secret, { expiresIn: '8h' });
   const sql = `INSERT INTO online_token (token, user_id) VALUES ('${token}', '${userInfo.id}')`; // 存入token
   mysql.query(sql);
   // token加密
@@ -73,6 +73,7 @@ exports.decryptToken = (ctx, tokens) => {
  * @param String tokens
  */
 exports.checkToken = (ctx, tokens) => {
+  tokens = tokens.replace(/\s+/g, ''); // 空格替换
   // 解密
   const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
   // 使用相同的算法、密钥和 iv 进行加密
@@ -93,5 +94,6 @@ exports.checkToken = (ctx, tokens) => {
  * @param String tokens
  */
 exports.decryptRSAToken = (ctx, tokens) => {
+  tokens = tokens.replace(/\s+/g, ''); // 空格替换, 超级账号换行导致会有空格
   return jwt.decode(ctx.decryptToken(tokens), secret);
 };
