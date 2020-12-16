@@ -9,15 +9,19 @@ const cors = require('koa2-cors'); // 跨域中间件
 const session = require('koa-session');
 const koaSwagger = require('koa2-swagger-ui');
 
+// 路由
 const index = require('./routes/index');
 const commom = require('./routes/commom'); // 通用服务
 const security = require('./routes/security'); // 登陆认证
 const image = require('./routes/image'); // 图片处理
 
+// 中间件
 const response = require('./middleware/response');
 const token = require('./middleware/token');
-const commonFun = require('./middleware/common');
-const utils = require('./utils');
+const myLog = require('./middleware/log');
+const utils = require('./middleware');
+
+// 公告方法
 const mysql = require('./mysql');
 const logsUtil = require('./utils/logs.js'); // 日志文件
 
@@ -57,7 +61,7 @@ app.use(
 app.use(response); // 返回体中间件
 app.use(cors()); // 设置允许跨域访问该服务.
 app.use(token); // token
-app.use(commonFun); // 公共方法
+app.use(myLog); // 日志中间件
 app.use(json());
 app.use(logger());
 app.use(require('koa-static')(__dirname + '/public')); // 静态资源
@@ -65,9 +69,12 @@ app.use(utils); // 公共方法
 
 // 权限认证
 app.use(async (ctx, next) => {
-  // 权限白名单 postman
+  // 权限白名单 POSTMAN SWAGGER
   const POSTMAN = ctx.request.header['user-agent'].slice(0, 7);
-  if (POSTMAN !== 'Postman') {
+  // eslint-disable-next-line dot-notation
+  // const SWAGGER = ctx.request.header['referer'].slice(-7);
+  if (POSTMAN === 'Postman') {
+  } else {
     // 白名单接口
     const WHITELIST = ['/security/publicKey', '/security/login'];
     if (!WHITELIST.some(element => element === ctx.request.url)) {
@@ -81,11 +88,10 @@ app.use(async (ctx, next) => {
           return ctx.error([0, '令牌已过期！']);
         }
       } else {
-        return ctx.error([0, '令牌已过期！']);
+        return ctx.error([0, 'token检验未通过！']);
       }
     }
   }
-
   await next();
 });
 

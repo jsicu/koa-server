@@ -5,7 +5,8 @@
  */
 
 // 获取人员列表
-const personList = 'SELECT *, p.person_id as person_id FROM person p LEFT JOIN image i ON p.person_id = i.person_id GROUP BY p.person_id';
+const personList =
+  'SELECT *, p.person_id as person_id FROM person p LEFT JOIN image i ON p.person_id = i.person_id GROUP BY p.person_id';
 // 新增人员
 const newPerson = (UUID, name) => {
   return `INSERT INTO person VALUES ('${UUID}', '${name}')`;

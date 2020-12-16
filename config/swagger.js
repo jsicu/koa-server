@@ -7,12 +7,49 @@ const router = require('koa-router')(); // 引入路由函数
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerDefinition = {
   info: {
-    title: 'API',
+    description:
+      'This is a sample server Koa2 server.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).',
     version: '1.0.0',
-    description: 'API'
+    title: 'Koa2_server Swagger',
+    // 服务条款
+    // termsOfService: 'http://swagger.io/terms/',
+    contact: {
+      name: 'Contact developers',
+      url: 'https://mail.qq.com/',
+      email: '741167479@qq.com'
+    },
+    // 开源协议
+    license: {
+      name: 'Apache 2.0',
+      url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+    }
   },
   host: 'localhost:4000',
-  basePath: '/' // Base path (optional)
+  basePath: '/', // Base path (optional), host/basePath
+  schemes: ['http', 'https'],
+  securityDefinitions: {
+    // TODO：不知道怎么用，等整明白了再说
+    // server_auth: {
+    //   type: 'oauth2',
+    //   description: '描述',
+    //   tokenUrl: 'http://localhost:4000/image/oauth',
+    //   flow: 'password',
+    //   scopes: {
+    //     token: 'modify pets in your account'
+    //   }
+    // },
+    token: {
+      description: `超级账号：dfcdb53df37919daf1825d2cbb86abfe27f9206f8cf119caa5770717bab4d0
+        7bcc61988e1f9e88fa9b45232410c4369ed8510984b658497d31e0731fd56a906d13d4a22e2ffc6d230
+        3bdfe1a54b8c97396b4a249c646576aa0a24d46288dbb1a4dae38929b0a151d8e35465c1b383056d779
+        c3044d05d4b56296572128b53bf10375e34aeb967c8c908800154e04c759b218feb94ef9be65425d159
+        6d4e2d6d121ff4138bb79010e56a5d8ffcf24be2c6a310156b8e109bc78a9e8653c7231a044191e4940
+        2f112cf90bb6cd6ae98356a405f66df1bcb4369169c10e24dd2ca6`,
+      type: 'apiKey',
+      name: 'token',
+      in: 'header'
+    }
+  }
 };
 const options = {
   swaggerDefinition,

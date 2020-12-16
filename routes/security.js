@@ -2,10 +2,14 @@ const mysql = require('../mysql');
 const router = require('koa-router')();
 const paramCheck = require('../utils/paramCheck');
 const Joi = require('joi'); // 参数校验
+const fs = require('fs'); // 引入fs模块
 
-const NodeRSA = require('node-rsa'); // rsa加密
-const key = new NodeRSA({ b: 512 });
-key.setOptions({ encryptionScheme: 'pkcs1' });
+const { v1 } = require('uuid'); // uuid生成
+
+// const NodeRSA = require('node-rsa'); // rsa加密
+// const key = new NodeRSA({ b: 512 });
+// key.setOptions({ encryptionScheme: 'pkcs1' });
+const { key } = require('../utils/encryption');
 
 router.prefix('/security');
 
@@ -84,11 +88,16 @@ router.post('/login', async (ctx, next) => {
  *         description: 请求参数错误
  *       '404':
  *         description: not found
+ *    # security:
+ *    #   - token: {}
+ *    #   - server_auth:
+ *    #     - token
  */
 // #endregion
 router.get('/publicKey', async (ctx, next) => {
   const publicKey = key.exportKey('public'); // 生成公钥
   ctx.success(publicKey);
+  // console.log(ctx.getToken({ name: 'superAccount', id: '00000000-0000-0000-0000-000000000000' }));
 });
 
 // #region
@@ -123,6 +132,8 @@ router.get('/publicKey', async (ctx, next) => {
  *         description: 请求参数错误
  *       '404':
  *         description: not found
+ *     security:
+ *       - token: {}
  */
 // #endregion
 router.post('/logout', async (ctx, next) => {
@@ -153,6 +164,8 @@ router.post('/logout', async (ctx, next) => {
  *     responses:
  *       200:
  *         description: 获取成功
+ *     security:
+ *       - token: {}
  */
 const { Email } = require('../config/nodemailer');
 const assert = require('assert').strict;
