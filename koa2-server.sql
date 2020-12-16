@@ -79,14 +79,13 @@ ALTER TABLE `log` ADD CONSTRAINT `log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES
 ALTER TABLE `online_token` ADD CONSTRAINT `online_token_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 ALTER TABLE `uesr_history` ADD CONSTRAINT `uesr_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
-
-
-
-
-
-
+-- 注册路由生成
 insert into route values(1,'首页', '/', '');
 insert into route values(2,'图像处理', '/home', '');
 insert into route values(21,'上传下载', 'home1', '');
 insert into route values(22,'头像更换', 'home3', '');
 insert into route values(3,'测试页', '/test', '');
+
+-- 基础账号生成，超级账号及admin
+INSERT INTO `koa2_server`.`user`(`id`, `name`, `password`, `create_time`, `update_time`, `is_cancel`) VALUES ('00000000-0000-0000-0000-000000000000', 'superAccount', '888888', '2020-01-01 00:00:00', '2020-01-01 00:00:00', 0)
+INSERT INTO `koa2_server`.`user`(`id`, `name`, `password`, `create_time`, `update_time`, `is_cancel`) VALUES ('00b817a0-3b71-11eb-a202-8176c989c09a', 'admin', 'admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00', 0)
