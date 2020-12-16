@@ -1,11 +1,13 @@
-// const mysql = require('../../mysql');
+const mysql = require('../../mysql');
+const Table = require('../../class/tableList'); // 列表返回格式
 const router = require('koa-router')();
-// const paramCheck = require('../utils/paramCheck');
+const sql = require('./sql');
 const utils = require('../../utils/');
 const fs = require('fs');
 const path = require('path');
 const qr = require('qr-image');
 const send = require('koa-send');
+const logsUtil = require('../../utils/logs.js'); // 日志文件
 
 router.prefix('/image');
 
@@ -14,7 +16,7 @@ const pwdPath = path.resolve(__dirname);
 
 // #region
 /**
- * @swagger
+ *
  * /image/{id}:
  *   get:
  *     summary: Returns a list of users.
@@ -45,25 +47,25 @@ const pwdPath = path.resolve(__dirname);
  *       '404':
  *         description: not found
  */
-// #endregion
 
-router.get('/:id', (ctx, next) => {
-  // console.log(ctx.params);
-  const obj = ctx.params;
-  const url = path.join(pwdPath, `assets/${obj.id}.png`);
-  const img = qr.image(obj.id, { type: 'png' });
-  img.pipe(fs.createWriteStream(url));
-  // 验证文件系统是否存在
-  const res = ctx.checkPath(url);
-  if (res) {
-    ctx.success(true);
-  }
-  //  删除文件
-  // fs.unlink(url, err => {
-  //   if (err) throw err;
-  //   console.log('文件已被删除');
-  // });
-});
+// router.get('/:id', (ctx, next) => {
+//   // console.log(ctx.params);
+//   const obj = ctx.params;
+//   const url = path.join(pwdPath, `assets/${obj.id}.png`);
+//   const img = qr.image(obj.id, { type: 'png' });
+//   img.pipe(fs.createWriteStream(url));
+//   // 验证文件系统是否存在
+//   const res = ctx.checkPath(url);
+//   if (res) {
+//     ctx.success(true);
+//   }
+//   //  删除文件
+//   // fs.unlink(url, err => {
+//   //   if (err) throw err;
+//   //   console.log('文件已被删除');
+//   // });
+// });
+// #endregion
 
 // 图片下载
 router.get('/download/:name', async ctx => {
@@ -77,10 +79,11 @@ router.get('/download/:name', async ctx => {
   await send(ctx, path);
 });
 
+// 图片上传
 // #region
 /**
  * @swagger
- * /image/download:
+ * /image/upload:
  *   post:
  *     summary: 图片上传
  *     description: 图片上传
@@ -124,29 +127,51 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage }); // upload.single('file'),
 
-router.post('/download', upload.single('file'), async ctx => {
+router.post('/upload', upload.single('file'), async ctx => {
+  const params = JSON.parse(JSON.stringify(ctx.request.body));
   if (ctx.file.size > 204800) {
     return ctx.error([0, '最大允许图片大小200k']);
   }
-  // console.log('ctx.request.file', ctx.request.file);
-  // console.log('ctx.file', ctx.file); // 可以获取保存的图片信息
+  const UUID = ctx.getUUID();
+  const imgUUID = ctx.getUUID();
+  try {
+    await mysql.query(sql.newPerson(UUID, params.name));
+    await mysql.query(sql.newImg(imgUUID, params.imgName, ctx.file.size, UUID));
+    const PATH = './public/uploads';
+    fs.readdir(PATH, (_err, files) => {
+      // files是名称数组
+      files.forEach(filename => {
+        if (filename === ctx.file.filename) {
+          const imgType = filename.split('.').slice(1)[0];
+          // 运用正则表达式替换oldPath中不想要的部分
+          const oldPath = PATH + '/' + filename;
+          const newPath = PATH + '/' + `${imgUUID}.${imgType}`;
+          // fs.rename(oldPath, newPath, callback)
+          fs.rename(oldPath, newPath, err => {
+            if (err) {
+              logsUtil.logHandleError(err, ctx.url, '图片重命名出错');
+              ctx.error([0, '新增失败']);
+            }
+          });
+        }
+      });
+    });
+    ctx.success(true);
+  } catch (error) {
+    logsUtil.logHandleError(error, ctx.url, '新增人员sql报错');
+    ctx.error([0, '新增失败']);
+  }
   // TODO: 修改图片名称、账号对应多个图片功能、假删除功能、前台获取图片功能
-  const base64Data = imgToBase64(path.join(process.cwd(), ctx.file.path)).replace(/^data:image\/\w+;base64,/, '');
-  // eslint-disable-next-line no-undef
-  const dataBuffer = Buffer.from(base64Data, 'base64');
-  fs.writeFile('image.jpg', dataBuffer, err => {
-    if (err) return ctx.error([0, err]);
-  });
-  ctx.success(true);
 });
 
+// 图片列表
 // #region
 /**
  * @swagger
- * /image/upload:
- *   post:
+ * /image/imgList:
+ *   get:
  *     summary: 图片上传
- *     description: 图片上传
+ *     description: 图片列表获取
  *     tags: [图片公共模块]
  *     parameters:
  *       - name: file
@@ -172,16 +197,41 @@ router.post('/download', upload.single('file'), async ctx => {
  *         description: not found
  */
 // #endregion
-router.post('/upload', async ctx => {
-  const file = ctx.request;
-  console.log(file);
-  ctx.success(true);
+router.get('/imgList', async ctx => {
+  let list = await mysql.query(sql.personList);
+  list = list.map(item => {
+    return {
+      name: item.person_name,
+      personId: item.person_id,
+      status: !!item.img_id
+    };
+  });
+  // const total = await mysql.query('SELECT count(person_id) FROM person;'); // total[0]['count(id)']
+  const table = new Table();
+  ctx.success(table.tableTotal(list.length, list));
+});
+
+// 图片详情
+router.get('/detail', async ctx => {
+  const data = await mysql.query(sql.personDetail(ctx.query.id));
+  const detail = {
+    name: data[0].person_name,
+    personId: data[0].person_id,
+    imgList: data.map(item => {
+      return {
+        imgName: item.img_name || '',
+        imgId: item.img_id
+      };
+    })
+  };
+  ctx.success(detail);
 });
 
 module.exports = router;
 
 /* 方法 */
 const mimeType = require('mime-types'); // 获取文件类型
+
 function imgToBase64(file) {
   const filePath = path.resolve(file); // 原始文件地址
   const fileName = filePath.split('\\').slice(-1)[0].split('.'); // 提取文件名

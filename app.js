@@ -16,6 +16,7 @@ const image = require('./routes/image'); // 图片处理
 
 const response = require('./middleware/response');
 const token = require('./middleware/token');
+const commonFun = require('./middleware/common');
 const utils = require('./utils');
 const mysql = require('./mysql');
 const logsUtil = require('./utils/logs.js'); // 日志文件
@@ -56,6 +57,7 @@ app.use(
 app.use(response); // 返回体中间件
 app.use(cors()); // 设置允许跨域访问该服务.
 app.use(token); // token
+app.use(commonFun); // 公共方法
 app.use(json());
 app.use(logger());
 app.use(require('koa-static')(__dirname + '/public')); // 静态资源
