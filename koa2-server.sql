@@ -81,9 +81,9 @@ ALTER TABLE `uesr_history` ADD CONSTRAINT `uesr_history_ibfk_1` FOREIGN KEY (`us
 
 -- 注册路由生成
 insert into route values(1,'首页', '/', '');
-insert into route values(2,'图像处理', '/home', '');
-insert into route values(21,'上传下载', 'home1', '');
-insert into route values(22,'头像更换', 'home3', '');
+insert into route values(2,'图像处理', '/image', '');
+insert into route values(21,'上传下载', 'downAndUp', '');
+insert into route values(22,'头像更换', 'home2', '');
 insert into route values(3,'测试页', '/test', '');
 
 -- 基础账号生成，超级账号及admin
