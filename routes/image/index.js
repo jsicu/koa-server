@@ -180,7 +180,6 @@ router.post('/upload', upload.single('file'), async ctx => {
           // fs.rename(oldPath, newPath, callback)
           fs.rename(oldPath, newPath, err => {
             if (err) {
-              logsUtil.logHandleError(err, ctx.url, '图片重命名出错');
               ctx.error([0, '新增失败']);
             }
           });
@@ -189,7 +188,6 @@ router.post('/upload', upload.single('file'), async ctx => {
     });
     ctx.success(true);
   } catch (error) {
-    logsUtil.logHandleError(error, ctx.url, '新增人员sql报错');
     ctx.error([0, '新增失败']);
   }
   // TODO: 修改图片名称、账号对应多个图片功能、假删除功能、前台获取图片功能
