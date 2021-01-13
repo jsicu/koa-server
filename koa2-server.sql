@@ -44,11 +44,12 @@ CREATE TABLE `person`  (
   PRIMARY KEY (`person_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '人员表' ROW_FORMAT = DYNAMIC;
 
-CREATE TABLE `route`  (
+CREATE TABLE `koa2_server`.`route`  (
   `id` int(0) NOT NULL COMMENT '路由id',
-  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '路由名称',
-  `alias` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '路由地址',
-  `icon` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '图标'
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '路由名称',
+  `alias` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '路由地址',
+  `icon` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '图标',
+  `status` tinyint(1) NOT NULL COMMENT '路由状态。0：失效；1：有效'
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '路由注册表' ROW_FORMAT = Dynamic;
 
 CREATE TABLE `uesr_history`  (
@@ -77,11 +78,12 @@ ALTER TABLE `online_token` ADD CONSTRAINT `online_token_ibfk_1` FOREIGN KEY (`us
 ALTER TABLE `uesr_history` ADD CONSTRAINT `uesr_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 -- 注册路由生成
-insert into route values(1,'首页', '/', '');
-insert into route values(2,'图像处理', '/image', '');
-insert into route values(21,'上传下载', 'downAndUp', '');
-insert into route values(22,'头像更换', 'home2', '');
-insert into route values(3,'测试页', '/test', '');
+insert into route values(1,'首页', '/', '', 1);
+insert into route values(2,'图像处理', '/image', '', 1);
+insert into route values(21,'上传下载', 'downAndUp', '', 1);
+insert into route values(22,'头像更换', 'home2', '', 1);
+insert into route values(3,'测试页', '/test', '', 1);
+insert into route values(4,'人机验证', '/verify', '', 1);
 
 -- 基础账号生成，超级账号及admin
 INSERT INTO `user`(`id`, `name`, `password`, `create_time`, `update_time`, `is_cancel`) VALUES ('00000000-0000-0000-0000-000000000000', 'superAccount', '888888', '2020-01-01 00:00:00', '2020-01-01 00:00:00', 0);

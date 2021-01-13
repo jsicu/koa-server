@@ -13,7 +13,6 @@ router.prefix('/image');
 
 // 日志根目录
 const pwdPath = path.resolve(__dirname);
-let sliderLeft = 0; // 滑块移动距离
 let position = []; // 点击文字坐标位置
 
 // #region
@@ -253,7 +252,7 @@ const L = w + r * 2 + 3; // 滑块实际边长
  * @swagger
  * /image/verify:
  *   get:
- *     summary: 验证
+ *     summary: 验证素材获取
  *     description: 验证功能
  *     tags: [图片公共模块]
  *     parameters:
@@ -372,6 +371,7 @@ router.get('/verify', async ctx => {
     };
     image.src = path.join(pwdPath, `/asset/${index}.jpg`);
 
+    // 滑块图片绘制
     const sliderCanvas = createCanvas(65, 180);
     const slider = sliderCanvas.getContext('2d');
     const sliderImg = new Image();
@@ -447,18 +447,22 @@ router.post('/check', async ctx => {
   const token = ctx.decryptRSAToken(headerToken);
 
   let checkJson = data.checkJson.replace(/\s+/g, '+'); // 防止公钥有空格存在
+  /**
+     *  由于使用公用的key,所以每编译一次key就改变一次
+     *  导致解密时容易解密失败报错
+     */
+  // checkJson = key.decrypt(checkJson, 'utf8'); // 解密，需前端配合加密
 
   let result = false;
   const R = 16; // 根据字体大小计算得到：22px R = Math.round(2 * 11^2)
   if (data.captchaType === 0 || data.captchaType) {
     // 点击验证
-    // checkJson = key.decrypt(checkJson, 'utf8'); // 解密，需前端配合加密
     checkJson = JSON.parse(checkJson);
     const sql = `select * from captcha where user_id='${token.id}' and type='1'`;
     const sqlResult = await mysql.query(sql);
     position = JSON.parse(sqlResult[0].check_json);
-    // console.log(await mysql.query(sql));
 
+    // 中心坐标重置
     for (const i in position) {
       const element = position[i];
       const radian = ((element.angle + 45) * PI) / 180;
@@ -483,16 +487,10 @@ router.post('/check', async ctx => {
     }
   } else {
     // 滑块验证
-    /**
-     *  由于使用公用的key,所以每编译一次key就改变一次
-     *  导致解密时容易解密失败报错
-     */
     const sql = `select * from captcha where user_id='${token.id}' and type='0'`;
     const sqlResult = await mysql.query(sql);
-    sliderLeft = Number(sqlResult[0].check_json);
-    console.log(sliderLeft);
+    const sliderLeft = Number(sqlResult[0].check_json); // 滑块移动距离
 
-    // checkJson = key.decrypt(checkJson, 'utf8'); // 解密,需前端配合加密
     checkJson = Number(checkJson) + 4;
     Math.abs(checkJson - sliderLeft) < 4 ? (result = true) : (result = false);
   }
