@@ -1,16 +1,18 @@
 const mysql = require('../../mysql');
+const Table = require('../../class/tableList'); // 列表返回格式
 const router = require('koa-router')();
+const sql = require('./sql');
 const fs = require('fs');
 const path = require('path');
 const qr = require('qr-image');
 const send = require('koa-send');
 const Joi = require('joi'); // 参数校验
+const { v1 } = require('uuid'); // uuid生成
 
 router.prefix('/image');
 
 // 日志根目录
 const pwdPath = path.resolve(__dirname);
-let sliderLeft = 0; // 滑块移动距离
 let position = []; // 点击文字坐标位置
 
 // #region
@@ -46,6 +48,24 @@ let position = []; // 点击文字坐标位置
  *       '404':
  *         description: not found
  */
+
+// router.get('/:id', (ctx, next) => {
+//   // console.log(ctx.params);
+//   const obj = ctx.params;
+//   const url = path.join(pwdPath, `assets/${obj.id}.png`);
+//   const img = qr.image(obj.id, { type: 'png' });
+//   img.pipe(fs.createWriteStream(url));
+//   // 验证文件系统是否存在
+//   const res = ctx.checkPath(url);
+//   if (res) {
+//     ctx.success(true);
+//   }
+//   //  删除文件
+//   // fs.unlink(url, err => {
+//   //   if (err) throw err;
+//   //   console.log('文件已被删除');
+//   // });
+// });
 // #endregion
 // router.get('/:id', (ctx, next) => {
 //   // console.log(ctx.params);
@@ -89,10 +109,11 @@ router.get('/download/:name', async ctx => {
   await send(ctx, path);
 });
 
+// 图片上传
 // #region
 /**
  * @swagger
- * /image/download:
+ * /image/upload:
  *   post:
  *     summary: 图片上传
  *     description: 图片上传
@@ -136,29 +157,49 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage }); // upload.single('file'),
 
-router.post('/download', upload.single('file'), async ctx => {
+router.post('/upload', upload.single('file'), async ctx => {
+  const params = JSON.parse(JSON.stringify(ctx.request.body));
   if (ctx.file.size > 204800) {
     return ctx.error([0, '最大允许图片大小200k']);
   }
-  // console.log('ctx.request.file', ctx.request.file);
-  // console.log('ctx.file', ctx.file); // 可以获取保存的图片信息
+  const UUID = v1();
+  const imgUUID = v1();
+  try {
+    await mysql.query(sql.newPerson(UUID, params.name));
+    await mysql.query(sql.newImg(imgUUID, params.imgName, ctx.file.size, UUID));
+    const PATH = './public/uploads';
+    fs.readdir(PATH, (_err, files) => {
+      // files是名称数组
+      files.forEach(filename => {
+        if (filename === ctx.file.filename) {
+          const imgType = filename.split('.').slice(1)[0];
+          // 运用正则表达式替换oldPath中不想要的部分
+          const oldPath = PATH + '/' + filename;
+          const newPath = PATH + '/' + `${imgUUID}.${imgType}`;
+          // fs.rename(oldPath, newPath, callback)
+          fs.rename(oldPath, newPath, err => {
+            if (err) {
+              ctx.error([0, '新增失败']);
+            }
+          });
+        }
+      });
+    });
+    ctx.success(true);
+  } catch (error) {
+    ctx.error([0, '新增失败']);
+  }
   // TODO: 修改图片名称、账号对应多个图片功能、假删除功能、前台获取图片功能
-  const base64Data = imgToBase64(path.join(process.cwd(), ctx.file.path)).replace(/^data:image\/\w+;base64,/, '');
-  // eslint-disable-next-line no-undef
-  const dataBuffer = Buffer.from(base64Data, 'base64');
-  fs.writeFile('image.jpg', dataBuffer, err => {
-    if (err) return ctx.error([0, err]);
-  });
-  ctx.success(true);
 });
 
+// 图片列表
 // #region
 /**
  * @swagger
- * /image/upload:
- *   post:
+ * /image/imgList:
+ *   get:
  *     summary: 图片上传
- *     description: 图片上传
+ *     description: 图片列表获取
  *     tags: [图片公共模块]
  *     parameters:
  *       - name: file
@@ -184,10 +225,18 @@ router.post('/download', upload.single('file'), async ctx => {
  *         description: not found
  */
 // #endregion
-router.post('/upload', async ctx => {
-  const file = ctx.request;
-  console.log(file);
-  ctx.success(true);
+router.get('/imgList', async ctx => {
+  let list = await mysql.query(sql.personList);
+  list = list.map(item => {
+    return {
+      name: item.person_name,
+      personId: item.person_id,
+      status: !!item.img_id
+    };
+  });
+  // const total = await mysql.query('SELECT count(person_id) FROM person;'); // total[0]['count(id)']
+  const table = new Table();
+  ctx.success(table.tableTotal(list.length, list));
 });
 
 const { Image, createCanvas, loadImage } = require('canvas');
@@ -203,7 +252,7 @@ const L = w + r * 2 + 3; // 滑块实际边长
  * @swagger
  * /image/verify:
  *   get:
- *     summary: 验证
+ *     summary: 验证素材获取
  *     description: 验证功能
  *     tags: [图片公共模块]
  *     parameters:
@@ -322,6 +371,7 @@ router.get('/verify', async ctx => {
     };
     image.src = path.join(pwdPath, `/asset/${index}.jpg`);
 
+    // 滑块图片绘制
     const sliderCanvas = createCanvas(65, 180);
     const slider = sliderCanvas.getContext('2d');
     const sliderImg = new Image();
@@ -397,18 +447,22 @@ router.post('/check', async ctx => {
   const token = ctx.decryptRSAToken(headerToken);
 
   let checkJson = data.checkJson.replace(/\s+/g, '+'); // 防止公钥有空格存在
+  /**
+     *  由于使用公用的key,所以每编译一次key就改变一次
+     *  导致解密时容易解密失败报错
+     */
+  // checkJson = key.decrypt(checkJson, 'utf8'); // 解密，需前端配合加密
 
   let result = false;
   const R = 16; // 根据字体大小计算得到：22px R = Math.round(2 * 11^2)
   if (data.captchaType === 0 || data.captchaType) {
     // 点击验证
-    // checkJson = key.decrypt(checkJson, 'utf8'); // 解密，需前端配合加密
     checkJson = JSON.parse(checkJson);
     const sql = `select * from captcha where user_id='${token.id}' and type='1'`;
     const sqlResult = await mysql.query(sql);
     position = JSON.parse(sqlResult[0].check_json);
-    // console.log(await mysql.query(sql));
 
+    // 中心坐标重置
     for (const i in position) {
       const element = position[i];
       const radian = ((element.angle + 45) * PI) / 180;
@@ -433,16 +487,10 @@ router.post('/check', async ctx => {
     }
   } else {
     // 滑块验证
-    /**
-     *  由于使用公用的key,所以每编译一次key就改变一次
-     *  导致解密时容易解密失败报错
-     */
     const sql = `select * from captcha where user_id='${token.id}' and type='0'`;
     const sqlResult = await mysql.query(sql);
-    sliderLeft = Number(sqlResult[0].check_json);
-    console.log(sliderLeft);
+    const sliderLeft = Number(sqlResult[0].check_json); // 滑块移动距离
 
-    // checkJson = key.decrypt(checkJson, 'utf8'); // 解密,需前端配合加密
     checkJson = Number(checkJson) + 4;
     Math.abs(checkJson - sliderLeft) < 4 ? (result = true) : (result = false);
   }
