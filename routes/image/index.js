@@ -300,7 +300,7 @@ router.get('/verify', async ctx => {
 
     const image = new Image();
     image.onload = () => {
-    // 随机位置创建拼图形状
+      // 随机位置创建拼图形状
       const X = getRandomNumberByRange(L + 10, width - (L + 10));
       position = X - 3;
       const Y = getRandomNumberByRange(10 + r * 2, height - (L + 10));
@@ -342,7 +342,9 @@ router.get('/verify', async ctx => {
   const token = ctx.decryptRSAToken(headerToken);
   let sql = `DELETE FROM captcha WHERE user_id = '${token.id}' and type='${type}'`;
   await mysql.query(sql);
-  sql = `INSERT INTO captcha (type, user_id, check_json) VALUES ('${type}', '${token.id}', '${JSON.stringify(position)}')`;
+  sql = `INSERT INTO captcha (type, user_id, check_json) VALUES ('${type}', '${token.id}', '${JSON.stringify(
+    position
+  )}')`;
   await mysql.query(sql);
 });
 

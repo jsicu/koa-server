@@ -66,3 +66,6 @@ insert into route values(2,'图像处理', '/home', '');
 insert into route values(21,'上传下载', 'home1', '');
 insert into route values(22,'头像更换', 'home3', '');
 insert into route values(3,'测试页', '/test', '');
+insert into route values(4,'人机验证', '/verify', '');
+insert into route values(41,'滑块拼图验证', 'slider', '');
+insert into route values(42,'点击验证', 'point', '');
