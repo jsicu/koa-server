@@ -1,16 +1,24 @@
+/*
+ * @Author: linzq
+ * @Date: 2020-11-25 10:02:48
+ * @LastEditors: linzq
+ * @LastEditTime: 2021-03-04 22:11:02
+ * @Description: mysql配置
+ */
 const mq = require('mysql2');
 const mysql = mq.createConnection({
   host: 'localhost',
   user: 'root',
   password: 'password',
   database: 'koa2_server',
-  charset: 'utf8mb4'
+  charset: 'utf8mb4',
+  multipleStatements: true // 支持执行多条 sql 语句
 });
 
-// mysql.connect(err => {
-//   if (err) throw err;
-//   console.log('数据库连接成功!');
-// });
+mysql.connect(err => {
+  if (err) throw err;
+  console.log('数据库连接成功!');
+});
 // mysql.query(
 //   'SELECT * FROM `koa2_server`.`user` LIMIT 0,1',
 //   (error, results, fields) => {
@@ -19,11 +27,13 @@ const mysql = mq.createConnection({
 //   }
 // );
 
+// 连接池连接
 const pool = mq.createPool({
   host: 'localhost',
   user: 'root',
   password: 'password',
-  database: 'koa2_server'
+  database: 'koa2_server',
+  multipleStatements: true // 支持执行多条 sql 语句
 });
 
 // 接收一个sql语句 以及所需的values

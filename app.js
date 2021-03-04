@@ -14,6 +14,7 @@ const index = require('./routes/index');
 const commom = require('./routes/commom'); // 通用服务
 const security = require('./routes/security'); // 登陆认证
 const image = require('./routes/image'); // 图片处理
+const bigScreen = require('./routes/bigScreen'); // 可视化
 
 // 中间件
 const response = require('./middleware/response');
@@ -127,6 +128,7 @@ app.use(index.routes(), index.allowedMethods());
 app.use(commom.routes(), commom.allowedMethods());
 app.use(security.routes(), security.allowedMethods());
 app.use(image.routes(), image.allowedMethods());
+app.use(bigScreen.routes(), bigScreen.allowedMethods());
 
 // error-handling
 app.on('error', (err, ctx) => {
