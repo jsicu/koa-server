@@ -52,17 +52,23 @@ const formatText = {
     // 响应状态码
     logText += 'response status: ' + ctx.status + '\n';
     // 响应内容
-    logText += 'response body: ' + '\n' + JSON.stringify(ctx.body) + '\n';
+    logText += 'response body: ' + '\n    ' + JSON.stringify(ctx.body) + '\n';
     // 响应日志结束
     logText += '*************** response log end ***************' + '\n';
     return logText;
   },
-  handle: function (info) {
+  handleError: function (info, url, remarks) {
     let logText = '';
     // 响应日志开始
     logText += '\n' + '***************info log start ***************' + '\n';
+    // 错误接口
+    logText += 'origin url: ' + url + '\n';
     // 响应内容
-    logText += 'handle info detail: ' + '\n' + JSON.stringify(info).replace(/\\n/g, '\n') + '\n';
+    logText += 'error info detail: ' + '\n    ' + JSON.stringify(info).replace(/\\n/g, '\n') + '\n';
+    // 其他备注
+    if (remarks) {
+      logText += 'remarks: ' + '\n    ' + remarks + '\n';
+    }
     // 响应日志结束
     logText += '*************** info log end ***************' + '\n';
     return logText;
@@ -98,10 +104,10 @@ module.exports = {
       resLogger.info(formatText.response(ctx, resTime));
     }
   },
-  // 封装操作日志
-  logHandle: function (res) {
-    if (res) {
-      handleLogger.info(formatText.handle(res));
+  // 封装主动错误处理日志
+  logHandleError: function (res, url, remarks = undefined) {
+    if (res && url) {
+      handleLogger.info(formatText.handleError(res, url, remarks));
     }
   },
   // 封装错误日志

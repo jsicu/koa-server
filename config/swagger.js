@@ -1,3 +1,10 @@
+/*
+ * @Author: linzq
+ * @Date: 2020-11-25 10:02:48
+ * @LastEditors: linzq
+ * @LastEditTime: 2021-03-01 19:51:35
+ * @Description: swagger配置
+ */
 /**
  * @author: linzq
  * @date: 2020/07/20
@@ -54,7 +61,7 @@ const swaggerDefinition = {
 const options = {
   swaggerDefinition,
   // 写有注解的router的存放地址
-  apis: ['./routes/*.js', './routes/image/*.js'] // routes下所有的js文件和routes/image下所有js文件
+  apis: ['./routes/*.js', './routes/image/*.js', './routes/*/*.js'] // routes下所有的js文件和routes/image下所有js文件
 };
 const swaggerSpec = swaggerJSDoc(options);
 // 通过路由获取生成的注解文件
