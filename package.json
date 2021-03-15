@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@koa/multer": "^3.0.0",
-    "canvas": "^2.6.1",
+    "canvas": "^2.7.0",
     "crypto": "^1.0.1",
     "debug": "^4.1.1",
     "joi": "^17.1.1",

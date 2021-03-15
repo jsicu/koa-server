@@ -4,6 +4,7 @@ package-lock.json
 logs/
 backups/ 
 public/uploads/ 
+deploy.sh
 
 # Editor directories and files
 .idea
