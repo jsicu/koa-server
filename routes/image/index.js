@@ -1,5 +1,5 @@
 const mysql = require('../../mysql');
-const Table = require('../../class/tableList'); // 列表返回格式
+const Table = require('root/core/tableList'); // 列表返回格式
 const router = require('koa-router')();
 const sql = require('./sql');
 const fs = require('fs');
@@ -235,11 +235,10 @@ router.get('/imgList', async ctx => {
     };
   });
   // const total = await mysql.query('SELECT count(person_id) FROM person;'); // total[0]['count(id)']
-  const table = new Table();
-  ctx.success(table.tableTotal(list.length, list));
+  ctx.success(Table.tableTotal(list.length, list));
 });
 
-const { Image, createCanvas, loadImage } = require('canvas');
+// const { Image, createCanvas, loadImage } = require('canvas');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms)); // 延时
 
 const w = 40; // 正方形边长

@@ -9,4 +9,7 @@ const sessionConfig = {
   renew: false // (boolean) 会话即将到期时,续订会话
 };
 
-module.exports = { sessionConfig };
+module.exports = {
+  sessionConfig,
+  NODE_ENV: 'development'
+};

@@ -2,14 +2,15 @@
  * @Author: linzq
  * @Date: 2021-03-01 19:36:54
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-06 18:12:03
+ * @LastEditTime: 2021-03-16 22:12:12
  * @Description: 大屏接口
  */
-const mysql = require('../../mysql');
-const Table = require('../../class/tableList'); // 列表返回格式
+const mysql = require('root/mysql');
+const Table = require('root/core/tableList'); // 列表返回格式
 const router = require('koa-router')();
 const sql = require('./sql');
 const Joi = require('joi'); // 参数校验
+const { HttpException } = require('../../core/http-exception');
 
 router.prefix('/bigScreen');
 
@@ -56,8 +57,7 @@ router.prefix('/bigScreen');
 router.post('/list', async ctx => {
   const data = ctx.request.body;
   const list = await mysql.query(sql.list(1000));
-  const table = new Table();
-  ctx.success(table.tableTotal(list.length, list));
+  ctx.success(Table.tableTotal(list.length, list));
 });
 
 // #region
@@ -153,7 +153,6 @@ router.post('/yearTrend', async ctx => {
   const touristTotal = await mysql.query(sql.touristTotal);
   const scenicTotal = await mysql.query(sql.scenicTotal);
 
-  console.log(scenicTotal);
   for (const key in touristTotal) {
     const ele = touristTotal[key][0];
     returnData.touristTotal.push(Number(Object.values(ele)[0] / 10000).toFixed(2));
@@ -313,7 +312,6 @@ router.post('/allData', async ctx => {
   for (const key in typeNumList) {
     for (const dictEle of dict) {
       if (typeNumList[key].typeId == dictEle.typeId) {
-        console.log(dictEle);
         typeNumList[key].typeName = dictEle.typeName;
       }
     }
@@ -374,13 +372,13 @@ router.post('/allData', async ctx => {
 // #endregion
 router.post('/detail', async ctx => {
   const data = ctx.request.body;
-  console.log(data);
   const schema = Joi.object({
     lng: Joi.required().error(new Error('lng参数不得为空！')),
     lat: Joi.required().error(new Error('lat参数不得为空！'))
   });
   const value = schema.validate(data);
-  if (value.error) return ctx.error([400, value.error.message]);
+  if (value.error) throw new global.err.ParamError(value.error.message);
+  // if (value.error) return ctx.error([400, value.error.message]);
   const list = await mysql.query(sql.detail(data.lng, data.lat));
   ctx.success(list);
 });

@@ -8,13 +8,11 @@ const logger = require('koa-logger');
 const cors = require('koa2-cors'); // 跨域中间件
 const session = require('koa-session');
 const koaSwagger = require('koa2-swagger-ui');
+require('module-alias/register'); // 路径别名
 
 // 路由
-const index = require('./routes/index');
-const commom = require('./routes/commom'); // 通用服务
-const security = require('./routes/security'); // 登陆认证
-const image = require('./routes/image'); // 图片处理
-const bigScreen = require('./routes/bigScreen'); // 可视化
+const InitManager = require('./core/init');
+InitManager.loadConfig(); // 全局配置
 
 // 中间件
 const response = require('./middleware/response');
@@ -23,7 +21,7 @@ const myLog = require('./middleware/log');
 const utils = require('./middleware');
 
 // 公告方法
-const mysql = require('./mysql');
+// const mysql = require('./mysql');
 const logsUtil = require('./utils/logs.js'); // 日志文件
 
 let ms = 0; // 接口耗时
@@ -50,8 +48,8 @@ onerror(app);
 /*  middlewares */
 
 // 统一错误异常处理
-// const errorHandler = require('./middleware/errorHandler');
-// errorHandler(app);
+const errorHandler = require('./middleware/errorHandler');
+app.use(errorHandler);
 
 app.use(
   bodyparser({
@@ -123,18 +121,14 @@ app.use(async (ctx, next) => {
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`);
 });
 
-// routes
-app.use(index.routes(), index.allowedMethods());
-app.use(commom.routes(), commom.allowedMethods());
-app.use(security.routes(), security.allowedMethods());
-app.use(image.routes(), image.allowedMethods());
-app.use(bigScreen.routes(), bigScreen.allowedMethods());
+// 路由注册
+InitManager.initCore(app);
 
-// error-handling
-app.on('error', (err, ctx) => {
-  // console.error('server error', err, ctx);
-  logsUtil.logError(ctx, err, ms); // 记录异常日志
-  ctx.error([0, err]);
-});
+// // error-handling
+// app.on('error', (err, ctx) => {
+//   // console.error('server error', err, ctx);
+//   logsUtil.logError(ctx, err, ms); // 记录异常日志
+//   ctx.error([0, err]);
+// });
 
 module.exports = app;

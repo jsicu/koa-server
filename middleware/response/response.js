@@ -1,3 +1,10 @@
+/*
+ * @Author: linzq
+ * @Date: 2020-11-25 10:02:48
+ * @LastEditors: linzq
+ * @LastEditTime: 2021-03-16 20:59:49
+ * @Description:
+ */
 /** !
  * response
  * Copyright(c) 2020
@@ -55,11 +62,11 @@ exports.success = (ctx, data, code = 1, message = '操作成功') => {
  * @param code 错误码 || [错误码, 错误描述]
  * @param message 错误描述
  */
-exports.error = (ctx, code = 0, message = '操作失败') => {
+exports.error = (ctx, code = 0, data = '', message = '操作失败') => {
   if (typeof code === 'object') {
     message = code[1];
     code = code[0];
   }
   logsUtil.logError(ctx, message, 0); // 记录异常日志
-  this.response(ctx, response.data, code, message);
+  this.response(ctx, data, code, message);
 };

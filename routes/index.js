@@ -1,4 +1,13 @@
+/*
+ * @Author: linzq
+ * @Date: 2020-11-25 10:02:48
+ * @LastEditors: linzq
+ * @LastEditTime: 2021-03-16 16:07:11
+ * @Description: 测试接口
+ */
 const router = require('koa-router')();
+
+router.prefix('/index');
 
 router.get('/', async (ctx, next) => {
   await ctx.render('index', {
