@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-03-01 19:36:54
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-16 22:12:12
+ * @LastEditTime: 2021-03-22 15:12:27
  * @Description: 大屏接口
  */
 const mysql = require('root/mysql');
@@ -10,9 +10,16 @@ const Table = require('root/core/tableList'); // 列表返回格式
 const router = require('koa-router')();
 const sql = require('./sql');
 const Joi = require('joi'); // 参数校验
-const { HttpException } = require('../../core/http-exception');
 
 router.prefix('/bigScreen');
+
+//
+router.get('/list', async ctx => {
+  const data = ctx.request.body;
+  const res = await mysql.query(sql.list(1, 10));
+  console.log(res[1][0]);
+  ctx.success(Table.tableTotal(res[1][0].total, res[0]));
+});
 
 // 热力图数据
 // #region
@@ -54,9 +61,9 @@ router.prefix('/bigScreen');
  *       - token: {}
  */
 // #endregion
-router.post('/list', async ctx => {
+router.post('/allList', async ctx => {
   const data = ctx.request.body;
-  const list = await mysql.query(sql.list(1000));
+  const list = await mysql.query(sql.allList(1000));
   ctx.success(Table.tableTotal(list.length, list));
 });
 

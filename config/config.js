@@ -11,5 +11,5 @@ const sessionConfig = {
 
 module.exports = {
   sessionConfig,
-  NODE_ENV: 'development'
+  NODE_ENV: 'development' // production development
 };

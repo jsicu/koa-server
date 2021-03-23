@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-03-01 19:40:24
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-06 16:39:51
+ * @LastEditTime: 2021-03-23 17:56:46
  * @Description:
  */
 /**
@@ -12,7 +12,12 @@
  */
 
 // 获取列表
-const list = (num = 1000) => {
+const list = (pageNum = 1, pageSize = 10) => {
+  return `select * from scenic_spot limit ${(pageNum - 1) * pageSize}, ${pageSize};
+  select COUNT(id) as total from scenic_spot;`;
+};
+// 获取列表
+const allList = (num = 1000) => {
   return `SELECT dest_id, dest_name, lat, lng FROM scenic_spot limit ${num};`;
 };
 // 等级情况分布
@@ -59,4 +64,16 @@ SELECT min(today_tourists_num) as minTodayTourists from scenic_spot;
 SELECT max(today_tourists_num) as maxTodayTourists from scenic_spot;
 SELECT max(play_time) as maxPlayTime from scenic_spot;`;
 
-module.exports = { list, grade, numList, touristTotal, scenicTotal, topTen, typeNumList, dict, realData, detail };
+module.exports = {
+  list,
+  allList,
+  grade,
+  numList,
+  touristTotal,
+  scenicTotal,
+  topTen,
+  typeNumList,
+  dict,
+  realData,
+  detail
+};

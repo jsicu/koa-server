@@ -105,7 +105,9 @@ app.use(async (ctx, next) => {
   const start = new Date();
   await next();
   ms = new Date() - start;
-  logsUtil.logResponse(ctx, ms); // 记录响应日志
+  if (global.config.NODE_ENV === 'development') {
+    logsUtil.logResponse(ctx, ms); // 记录响应日志, 生产环境不输出，减少硬盘使用
+  }
   // 日志白名单
   // const whiteList = ['/security/login', '/security/email-verify', '/security/publicKey']
   // if (whiteList.includes(ctx.request.url)) {
@@ -123,12 +125,5 @@ app.use(async (ctx, next) => {
 
 // 路由注册
 InitManager.initCore(app);
-
-// // error-handling
-// app.on('error', (err, ctx) => {
-//   // console.error('server error', err, ctx);
-//   logsUtil.logError(ctx, err, ms); // 记录异常日志
-//   ctx.error([0, err]);
-// });
 
 module.exports = app;

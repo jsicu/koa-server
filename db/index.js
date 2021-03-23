@@ -1,0 +1,29 @@
+/*
+ * @Author: linzq
+ * @Date: 2021-03-23 14:22:54
+ * @LastEditors: linzq
+ * @LastEditTime: 2021-03-23 22:17:59
+ * @Description: 数据模型入口文件
+ */
+
+// const user = require('./model/user'); // 用户表
+// const route = require('./model/route'); // 路由表
+// const onlineToken = require('./model/onlineToken'); // token表
+// const dictionary = require('./model/dictionary'); // 字典表
+const scenicSpot = require('./model/scenicSpot'); // 景区表
+
+// 可以在此文件中建立外键关联关系
+// onlineToken.belongsTo(user, {
+//   foreignKey: 'id'
+// });
+
+// User->Blog
+// User.hasMany(Blog)
+
+module.exports = {
+  // user,
+  // route,
+  // onlineToken,
+  // dictionary,
+  scenicSpot
+};

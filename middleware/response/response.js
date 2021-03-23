@@ -2,26 +2,11 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-16 20:59:49
- * @Description:
- */
-/** !
- * response
- * Copyright(c) 2020
- * MIT Licensed
- *
- * Authors: linzq
- * describe: 返回实体类
+ * @LastEditTime: 2021-03-17 13:44:21
+ * @Description: 统一接口返回格式
  */
 
 'use strict';
-const logsUtil = require('../../utils/logs.js'); // 日志文件
-
-const response = {
-  code: 1,
-  data: '',
-  message: '操作成功'
-};
 
 /**
  * response
@@ -67,6 +52,6 @@ exports.error = (ctx, code = 0, data = '', message = '操作失败') => {
     message = code[1];
     code = code[0];
   }
-  logsUtil.logError(ctx, message, 0); // 记录异常日志
+  ctx.errorLog(ctx, message, 0); // 记录异常日志
   this.response(ctx, data, code, message);
 };
