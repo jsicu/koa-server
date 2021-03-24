@@ -2,11 +2,12 @@
  * @Author: linzq
  * @Date: 2021-03-23 11:30:43
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-23 16:27:06
+ * @LastEditTime: 2021-03-24 14:46:36
  * @Description: Sequelize
  */
 
 const Sequelize = require('sequelize');
+// 数据库信息
 const db = {
   database: 'seq_test', // 使用哪个数据库
   username: 'root', // 用户名

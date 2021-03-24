@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-03-23 14:21:52
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-23 22:12:19
+ * @LastEditTime: 2021-03-24 11:15:53
  * @Description: 路由模型
  */
 const Sequelize = require('sequelize');
@@ -29,5 +29,9 @@ const route = seq.define('route', {
     allowNull: false,
     comment: '路由状态。0：失效；1：有效'
   }
+},
+{
+  // 写表注释
+  comment: '路由表'
 });
 module.exports = route;

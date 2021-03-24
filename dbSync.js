@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-03-23 14:24:09
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-23 22:11:35
+ * @LastEditTime: 2021-03-24 09:55:19
  * @Description: 模型数据库同步
  */
 
@@ -10,7 +10,7 @@ const sequelize = require('./db/db.js');
 require('./db/index');
 sequelize
   .sync({
-    force: false // 如果表已经存在，则删除表后再创建
+    force: true // 如果表已经存在，则删除表后再创建
   })
   .then(result => {
     console.log('所有模型均已成功同步');

@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-03-01 19:40:24
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-23 17:56:46
+ * @LastEditTime: 2021-03-24 13:56:52
  * @Description:
  */
 /**
@@ -53,7 +53,7 @@ const topTen =
 // 类型数量
 const typeNumList = 'SELECT type as typeId, SUM(tourists_num) as total from scenic_spot GROUP BY typeId;';
 // 字典
-const dict = 'SELECT dict_id as typeId, name as typeName from dictionarie;';
+const dict = 'SELECT dict_id as typeId, label as typeName from dictionary;';
 
 const realData = `SELECT SUM(tourists_num) as tourists from scenic_spot;
 SELECT SUM(today_tourists_num) as todayTourists from scenic_spot;

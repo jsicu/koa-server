@@ -47,7 +47,7 @@ router.post('/login', async (ctx, next) => {
     const password = user.password.replace(/\s+/g, '+'); // 防止公钥有空格存在
     user.password = key.decrypt(password, 'utf8'); // 解密
     // eslint-disable-next-line quotes
-    const sql = "select * from `user` where `name`='" + user.name + "' and `password`='" + user.password + "'";
+    const sql = "select * from `user` where `user_name`='" + user.name + "' and `password`='" + user.password + "'";
     const result = await mysql.query(sql);
     if (result[0] && result[0].is_cancel === 0) {
       const tk = ctx.getToken({ name: result[0].name, id: result[0].id }); // token中要携带的信息，自己定义
