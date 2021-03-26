@@ -2,11 +2,12 @@
  * @Author: linzq
  * @Date: 2021-03-23 14:19:45
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-24 11:38:45
+ * @LastEditTime: 2021-03-26 16:06:13
  * @Description: 用户表数据模型
  */
 const Sequelize = require('sequelize');
 const seq = require('../db');
+const crypto = require('crypto');
 
 // users
 const user = seq.define(
@@ -16,6 +17,7 @@ const user = seq.define(
       type: Sequelize.STRING(64),
       primaryKey: true,
       allowNull: false, // 是否允许为空
+      defaultValue: Sequelize.UUIDV1,
       unique: true, // 是否是唯一索引
       comment: '主键'
     },

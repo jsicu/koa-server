@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-03-24 11:05:45
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-24 11:15:40
+ * @LastEditTime: 2021-03-24 16:36:01
  * @Description: 图像验证数据缓存表
  */
 const Sequelize = require('sequelize');
@@ -22,7 +22,7 @@ const captcha = seq.define(
       allowNull: false, // 是否允许为空
       comment: '验证类型，0：滑块拼图；1：点击验证'
     },
-    check_json: {
+    checkJson: {
       type: Sequelize.STRING,
       allowNull: false, // 是否允许为空
       comment: '验证数据'

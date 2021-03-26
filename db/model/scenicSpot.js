@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-03-23 20:59:22
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-24 10:50:31
+ * @LastEditTime: 2021-03-24 22:56:51
  * @Description: 景区详情表模型 scenic_spot
  */
 const Sequelize = require('sequelize');
@@ -13,7 +13,8 @@ const scenicSpot = seq.define(
   'scenic_spot',
   {
     destId: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING(64),
+      defaultValue: Sequelize.UUIDV1,
       allowNull: false, // 是否允许为空
       unique: true, // 是否是唯一索引
       comment: '景区id'
@@ -44,7 +45,7 @@ const scenicSpot = seq.define(
     touristSeason: { type: Sequelize.STRING(2047) },
     trafficGuide: { type: Sequelize.TEXT },
     tips: { type: Sequelize.STRING(1024) },
-    time_reference: { type: Sequelize.STRING },
+    timeReference: { type: Sequelize.STRING },
     url: { type: Sequelize.STRING },
     grade_2015: { type: Sequelize.STRING(1), comment: '年度景区等级，数字几代表几级' },
     grade_2016: { type: Sequelize.STRING(1), comment: '年度景区等级' },
@@ -57,15 +58,15 @@ const scenicSpot = seq.define(
       comment:
         '景区类别：1:文博院馆;2:寺庙观堂; 3:旅游度假区; 4:自然保护区; 5:主题公园; 6:森林公园; 7:地质公园; 8:游乐园; 9:动物园; 0:植物园'
     },
-    today_tourists_num: { type: Sequelize.INTEGER, comment: '今日入园游客' },
-    play_time: { type: Sequelize.INTEGER, comment: '平均游玩时间：分钟' },
-    year_tourists_2015: { type: Sequelize.INTEGER, comment: '年游客数' },
-    year_tourists_2016: { type: Sequelize.INTEGER, comment: '年游客数' },
-    year_tourists_2017: { type: Sequelize.INTEGER, comment: '年游客数' },
-    year_tourists_2018: { type: Sequelize.INTEGER, comment: '年游客数' },
-    year_tourists_2019: { type: Sequelize.INTEGER, comment: '年游客数' },
-    year_tourists_2020: { type: Sequelize.INTEGER, comment: '年游客数' },
-    year_tourists_2021: { type: Sequelize.INTEGER, comment: '年游客数' }
+    todayTouristsNum: { type: Sequelize.INTEGER, comment: '今日入园游客' },
+    playTime: { type: Sequelize.INTEGER, comment: '平均游玩时间：分钟' },
+    yearTourists_2015: { type: Sequelize.INTEGER, comment: '年游客数' },
+    yearTourists_2016: { type: Sequelize.INTEGER, comment: '年游客数' },
+    yearTourists_2017: { type: Sequelize.INTEGER, comment: '年游客数' },
+    yearTourists_2018: { type: Sequelize.INTEGER, comment: '年游客数' },
+    yearTourists_2019: { type: Sequelize.INTEGER, comment: '年游客数' },
+    yearTourists_2020: { type: Sequelize.INTEGER, comment: '年游客数' },
+    yearTourists_2021: { type: Sequelize.INTEGER, comment: '年游客数' }
   },
   {
     // timestamps: false, // 是否自动创建时间字段， 默认会自动创建createdAt、updatedAt

@@ -15,13 +15,14 @@ const InitManager = require('./core/init');
 InitManager.loadConfig(); // 全局配置
 
 // 中间件
+const errorHandler = require('./middleware/errorHandler');
 const response = require('./middleware/response');
 const token = require('./middleware/token');
 const myLog = require('./middleware/log');
+const validate = require('./middleware/validate');
 const utils = require('./middleware');
 
 // 公告方法
-// const mysql = require('./mysql');
 const logsUtil = require('./utils/logs.js'); // 日志文件
 
 let ms = 0; // 接口耗时
@@ -45,18 +46,15 @@ app.use(
 // error handler
 onerror(app);
 
-/*  middlewares */
-
-// 统一错误异常处理
-const errorHandler = require('./middleware/errorHandler');
-app.use(errorHandler);
-
 app.use(
   bodyparser({
     enableTypes: ['json', 'form', 'text']
   })
+
 );
 
+app.use(errorHandler); // 统一错误异常处理
+app.use(validate); // 验证
 app.use(response); // 返回体中间件
 app.use(cors()); // 设置允许跨域访问该服务.
 app.use(token); // token
@@ -75,7 +73,7 @@ app.use(async (ctx, next) => {
   if (POSTMAN === 'Postman') {
   } else {
     // 白名单接口
-    const WHITELIST = ['/security/publicKey', '/security/login'];
+    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut'];
     if (!WHITELIST.some(element => element === ctx.request.url)) {
       const headerToken = ctx.request.header.token;
       const queryToken = ctx.query.token;

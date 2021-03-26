@@ -1,3 +1,10 @@
+/*
+ * @Author: linzq
+ * @Date: 2020-11-25 10:02:48
+ * @LastEditors: linzq
+ * @LastEditTime: 2021-03-26 14:36:08
+ * @Description:
+ */
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const NodeRSA = require('node-rsa');
@@ -20,24 +27,9 @@ const key = crypto.scryptSync(PASSWORD, '盐值', 24);
 // 使用 `crypto.randomBytes()` 生成随机的 iv 而不是此处显示的静态的 iv。
 const iv = Buffer.alloc(16, 16); // 初始化向量。
 
-/* token再加密测试 */
-// const token = jwt.sign({ name: 'admin', id: 1 }, secret, { expiresIn: '1h' });
-// console.log(token);
-
-// const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
-// let encrypted = cipher.update(token, 'utf8', 'hex');
-// encrypted += cipher.final('hex');
-// console.log(encrypted);
-
-// const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-// // 使用相同的算法、密钥和 iv 进行加密
-// let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-// decrypted += decipher.final('utf8');
-// console.log(decrypted);
-
 /**
  * token生成
- * @param Object userInfoh
+ * @param Object userInfo
  */
 exports.getToken = (ctx, userInfo) => {
   // 创建token并导出

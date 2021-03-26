@@ -10,7 +10,7 @@
     "host": "localhost",
     "user": "root",
     "password": "password",
-    "database": "koa2_server",
+    "database": "seq_test",
     "multipleStatements": true
   }
 }

@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-03-01 19:36:54
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-22 15:12:27
+ * @LastEditTime: 2021-03-25 23:30:23
  * @Description: 大屏接口
  */
 const mysql = require('root/mysql');
@@ -10,18 +10,108 @@ const Table = require('root/core/tableList'); // 列表返回格式
 const router = require('koa-router')();
 const sql = require('./sql');
 const Joi = require('joi'); // 参数校验
-
+const { scenicSpot } = require('@db/index');
+const { Op } = require('sequelize');
 router.prefix('/bigScreen');
 
-//
-router.get('/list', async ctx => {
+// #region
+/**
+ * @swagger
+ * /bigScreen/dest:
+ *   post:
+ *     summary: 景区详情
+ *     description: 景区详情
+ *     tags: [可视化模块]
+ *     parameters:
+ *       - name: deatId
+ *         description: id
+ *         in: formData
+ *         type: number
+ *     responses:
+ *       '200':
+ *         description: Ok
+ *         schema:
+ *           type: 'object'
+ *           properties:
+ *             code:
+ *               type: 'number'
+ *             data:
+ *               type: 'object'
+ *               description: 返回数据
+ *             message:
+ *               type: 'string'
+ *               description: 消息提示
+ *       '400':
+ *         description: 请求参数错误
+ *       '404':
+ *         description: not found
+ *     security:
+ *       - token: {}
+ */
+// #endregion
+router.get('/dest', async ctx => {
   const data = ctx.request.body;
-  const res = await mysql.query(sql.list(1, 10));
-  console.log(res[1][0]);
-  ctx.success(Table.tableTotal(res[1][0].total, res[0]));
+  const schema = Joi.object({
+    destId: Joi.required().invalid('').error(new Error('景区id参数不得为空'))
+  });
+  const { destId } = data;
+  const required = { destId };
+  const value = schema.validate(required);
+  if (value.error) throw new global.err.ParamError(value.error.message);
+  const res = await scenicSpot.findAll({
+    where: required
+  });
+  ctx.success(res);
 });
 
-// 热力图数据
+router.post('/dest', async ctx => {
+  const data = ctx.request.body;
+  const schema = Joi.object({
+    destName: Joi.required().invalid('').error(new Error('景区名称不得为空'))
+  });
+  const { destName } = data;
+  const required = { destName };
+  const value = schema.validate(required);
+  if (value.error) throw new global.err.ParamError(value.error.message);
+  const res = await scenicSpot.create(data);
+  ctx.success(res);
+});
+
+router.put('/dest', async ctx => {
+  const data = ctx.request.body;
+  const schema = Joi.object({
+    destId: Joi.required().invalid('').error(new Error('景区id不得为空')),
+    destName: Joi.required().invalid('').error(new Error('景区名称不得为空'))
+  });
+  const { destId, destName } = data;
+  const required = { destId, destName };
+  const value = schema.validate(required);
+  if (value.error) throw new global.err.ParamError(value.error.message);
+  const res = await scenicSpot.update(data, { where: { destId: data.destId } });
+  if (res[0] === 1) {
+    ctx.success(true);
+  } else {
+    ctx.error([0, '修改失败']);
+  }
+});
+
+router.delete('/dest', async ctx => {
+  const data = ctx.request.body;
+  const schema = Joi.object({
+    destId: Joi.required().invalid('').error(new Error('景区id不得为空'))
+  });
+  const { destId } = data;
+  const required = { destId };
+  const value = schema.validate(required);
+  if (value.error) throw new global.err.ParamError(value.error.message);
+  const res = await scenicSpot.destroy({ where: data });
+  if (res === 1) {
+    ctx.success(true);
+  } else {
+    ctx.error([0, '修改失败']);
+  }
+});
+
 // #region
 /**
  * @swagger
@@ -39,6 +129,67 @@ router.get('/list', async ctx => {
  *         description: 条数
  *         in: formData
  *         type: number
+ *     responses:
+ *       '200':
+ *         description: Ok
+ *         schema:
+ *           type: 'object'
+ *           properties:
+ *             code:
+ *               type: 'number'
+ *             data:
+ *               type: 'object'
+ *               description: 返回数据
+ *             message:
+ *               type: 'string'
+ *               description: 消息提示
+ *       '400':
+ *         description: 请求参数错误
+ *       '404':
+ *         description: not found
+ *     security:
+ *       - token: {}
+ */
+// #endregion
+router.get('/list', async ctx => {
+  const data = ctx.request.query;
+  const schema = Joi.object({
+    pageNum: Joi.required().invalid('').error(new Error('pageNum参数不得为空且大于0！')),
+    pageSize: Joi.required().invalid('').error(new Error('pageSize参数不得为空且大于0！')),
+    destEnName: ctx.joiReplace()
+  });
+  const { pageNum, pageSize, destEnName } = data;
+  let required = { pageNum, pageSize, destEnName };
+  const value = schema.validate(required);
+
+  if (value.error) throw new global.err.ParamError(value.error.message);
+  required = value.value;
+  delete required.pageNum;
+  delete required.pageSize;
+  const search = {};
+  for (const i in required) {
+    if (required[i]) {
+      console.log(i, ':', required[i]);
+      search[i] = { [Op.substring]: required[i] };
+    }
+  }
+  const { count, rows } = await scenicSpot.findAndCountAll({
+    offset: (pageNum - 1) * pageSize,
+    limit: pageSize - 0,
+    where: search
+  });
+  ctx.success(Table.tableTotal(count, rows));
+});
+
+// 热力图数据
+// #region
+/**
+ * @swagger
+ * /bigScreen/allList:
+ *   post:
+ *     summary: 数据列表
+ *     description: 数据列表
+ *     tags: [可视化模块]
  *     responses:
  *       '200':
  *         description: Ok

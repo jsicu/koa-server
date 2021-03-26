@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-03-23 11:30:43
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-24 14:46:36
+ * @LastEditTime: 2021-03-26 15:52:12
  * @Description: Sequelize
  */
 
@@ -26,6 +26,7 @@ const sequelize = new Sequelize(db.database, db.username, db.password, {
     min: 0, // 连接池中最小连接数量
     idle: 30000 // 如果一个线程 30 秒钟内没有被使用过的话，那么就释放线程
   },
+  // logging: false, // 关闭打印
   // 解决中文输入问题
   define: {
     timestamps: true, // 是否自动创建时间字段， 默认会自动创建createdAt、updatedAt

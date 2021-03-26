@@ -1,8 +1,9 @@
-const mysql = require('../mysql');
 const router = require('koa-router')();
 const paramCheck = require('../utils/paramCheck');
 const Joi = require('joi'); // 参数校验
 const fs = require('fs'); // 引入fs模块
+const crypto = require('crypto'); // 引入fs模块
+const { user, onlineToken } = require('@db/index');
 
 const { v1 } = require('uuid'); // uuid生成
 
@@ -39,25 +40,37 @@ router.prefix('/security');
  */
 // #endregion
 router.post('/login', async (ctx, next) => {
-  const requestParam = ['name', 'password'];
-  const user = ctx.request.body;
-  if (paramCheck.check(user, requestParam) !== true) {
-    ctx.error([0, paramCheck.check(user, requestParam)]);
+  const requestParam = ['userName', 'password'];
+  const data = ctx.request.body;
+  const pw = data.password.replace(/\s+/g, '+'); // 防止公钥有空格存在
+  data.password = key.decrypt(pw, 'utf8'); // 解密
+  const schema = Joi.object({
+    userName: ctx.joiRequired('用户名称'),
+    password: ctx.joiRequired('账号密码')
+  });
+  const { userName, password } = data;
+  let required = { userName, password };
+  const value = schema.validate(required);
+
+  if (value.error) throw new global.err.ParamError(value.error.message);
+
+  // 加密
+  const hmac = crypto.createHmac('sha256', required.userName);
+  hmac.update(required.password);
+  required.password = hmac.digest('hex');
+  required = { ...required, isCancel: 0 };
+  const res = await user.findAll({
+    where: required
+  });
+  if (res.length > 0) {
+    const result = res[0].dataValues;
+    const tk = ctx.getToken({ name: result.userName, id: result.id }); // token中要携带的信息，自己定义
+    ctx.success({
+      id: result.id,
+      token: tk
+    });
   } else {
-    const password = user.password.replace(/\s+/g, '+'); // 防止公钥有空格存在
-    user.password = key.decrypt(password, 'utf8'); // 解密
-    // eslint-disable-next-line quotes
-    const sql = "select * from `user` where `user_name`='" + user.name + "' and `password`='" + user.password + "'";
-    const result = await mysql.query(sql);
-    if (result[0] && result[0].is_cancel === 0) {
-      const tk = ctx.getToken({ name: result[0].name, id: result[0].id }); // token中要携带的信息，自己定义
-      ctx.success({
-        id: result[0].id,
-        token: tk
-      });
-    } else {
-      ctx.error([0, '用户名或密码错误']);
-    }
+    ctx.error([0, '用户名或密码错误']);
   }
 });
 
@@ -97,7 +110,6 @@ router.post('/login', async (ctx, next) => {
 router.get('/publicKey', async (ctx, next) => {
   const publicKey = key.exportKey('public'); // 生成公钥
   ctx.success(publicKey);
-  // console.log(ctx.getToken({ name: 'superAccount', id: '00000000-0000-0000-0000-000000000000' }));
 });
 
 // #region
@@ -138,15 +150,11 @@ router.get('/publicKey', async (ctx, next) => {
 // #endregion
 router.post('/logout', async (ctx, next) => {
   const decryptTk = ctx.decryptToken(ctx.request.header.token);
-  const sql = `DELETE FROM online_token WHERE token = '${decryptTk}'`;
-  const result = await mysql.query(sql);
-  if (result.affectedRows === 1) {
-    ctx.success(true);
-  } else {
-    ctx.error([0, '退出失败！']);
-  }
+  await onlineToken.destroy({ where: { token: decryptTk } });
+  ctx.success(true);
 });
 
+// #region
 /**
  * @swagger
  * /security/email-verify:
@@ -167,6 +175,7 @@ router.post('/logout', async (ctx, next) => {
  *     security:
  *       - token: {}
  */
+// #endregion
 const { Email } = require('../config/nodemailer');
 const assert = require('assert').strict;
 
@@ -198,10 +207,10 @@ router.post('/email-verify', async (ctx, next) => {
   }
 });
 
-// 注册接口（未开发）
+// 注册接口
 // #region
 /**
- *
+ * @swagger
  * /security/register:
  *   post:
  *     description: 注册
@@ -211,10 +220,10 @@ router.post('/email-verify', async (ctx, next) => {
  *     parameters:
  *       - name: email
  *         description: 邮箱
- *         required: true
+ *         required: false
  *         in: formData
  *         type: string
- *       - name: name
+ *       - name: userName
  *         description: 用户名
  *         in: formData
  *         required: true
@@ -227,7 +236,7 @@ router.post('/email-verify', async (ctx, next) => {
  *       - name: code
  *         description: 邮箱验证码
  *         in: formData
- *         required: true
+ *         required: false
  *         type: string
  *     responses:
  *       200:
@@ -235,8 +244,25 @@ router.post('/email-verify', async (ctx, next) => {
  */
 // #endregion
 router.post('/register', async (ctx, next) => {
-  console.log(ctx.session);
-  ctx.success(ctx.session.emailCode);
+  const data = ctx.request.body;
+  // 如果注册有加密
+  // const password = data.password.replace(/\s+/g, '+'); // 防止公钥有空格存在
+  // data.password = key.decrypt(password, 'utf8'); // 解密
+  const schema = Joi.object({
+    userName: ctx.joiRequired('用户名称'),
+    password: ctx.joiRequired('用户密码')
+  });
+  const { userName, password } = data;
+  const required = { userName, password };
+  const value = schema.validate(required);
+  if (value.error) throw new global.err.ParamError(value.error.message);
+
+  const hmac = crypto.createHmac('sha256', required.userName);
+  hmac.update(required.password);
+  required.password = hmac.digest('hex');
+
+  await user.create(required);
+  ctx.success(true);
 });
 
 module.exports = router;
