@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-03-01 19:36:54
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-25 23:30:23
+ * @LastEditTime: 2021-03-30 10:19:38
  * @Description: 大屏接口
  */
 const mysql = require('root/mysql');
@@ -154,22 +154,22 @@ router.delete('/dest', async ctx => {
 router.get('/list', async ctx => {
   const data = ctx.request.query;
   const schema = Joi.object({
-    pageNum: Joi.required().invalid('').error(new Error('pageNum参数不得为空且大于0！')),
-    pageSize: Joi.required().invalid('').error(new Error('pageSize参数不得为空且大于0！')),
-    destEnName: ctx.joiReplace()
+    pageNum: ctx.joiRequired('pageNum'),
+    pageSize: ctx.joiRequired('pageSize'),
+    destName: ctx.joiReplaceSpace(),
+    type: ctx.joiReplace()
   });
-  const { pageNum, pageSize, destEnName } = data;
-  let required = { pageNum, pageSize, destEnName };
-  const value = schema.validate(required);
-
+  const { pageNum, pageSize, destName, type } = data;
+  let required = { pageNum, pageSize, destName, type };
+  const value = await schema.validate(required);
   if (value.error) throw new global.err.ParamError(value.error.message);
   required = value.value;
+
   delete required.pageNum;
   delete required.pageSize;
   const search = {};
   for (const i in required) {
     if (required[i]) {
-      console.log(i, ':', required[i]);
       search[i] = { [Op.substring]: required[i] };
     }
   }

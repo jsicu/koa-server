@@ -40,7 +40,6 @@ router.prefix('/security');
  */
 // #endregion
 router.post('/login', async (ctx, next) => {
-  const requestParam = ['userName', 'password'];
   const data = ctx.request.body;
   const pw = data.password.replace(/\s+/g, '+'); // 防止公钥有空格存在
   data.password = key.decrypt(pw, 'utf8'); // 解密
