@@ -2,21 +2,19 @@
  * @Author: linzq
  * @Date: 2021-03-23 11:30:43
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-29 12:58:04
+ * @LastEditTime: 2021-03-30 14:26:48
  * @Description: Sequelize
  */
 
 const Sequelize = require('sequelize');
+const config = require('../config/config.js');
+const sql = require('../config/sql.json');
+
 // 数据库信息
-const db = {
-  database: 'seq_test', // 使用哪个数据库
-  username: 'root', // 用户名
-  password: 'password', // 口令
-  host: 'localhost', // 主机名
-  port: 3306 // 端口号，MySQL默认3306
-};
+const db = config.NODE_ENV === 'development' ? sql.dev : sql.pro;
+
 // 连接数据库
-const sequelize = new Sequelize(db.database, db.username, db.password, {
+const sequelize = new Sequelize(db.database, db.user, db.password, {
   host: db.host, // 数据库地址
   port: db.port, // 数据库端口
   dialect: 'mysql', // 指定连接的数据库类型

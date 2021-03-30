@@ -1,6 +1,7 @@
 {
   "pro": {
     "host": "localhost",
+    "port": 3306,
     "user": "admin",
     "password": "l@admin",
     "database": "koa2_server",
@@ -8,6 +9,7 @@
   },
   "dev": {
     "host": "localhost",
+    "port": 3306,
     "user": "root",
     "password": "password",
     "database": "seq_test",
