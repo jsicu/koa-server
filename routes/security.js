@@ -3,7 +3,7 @@ const paramCheck = require('../utils/paramCheck');
 const Joi = require('joi'); // 参数校验
 const fs = require('fs'); // 引入fs模块
 const crypto = require('crypto'); // 引入fs模块
-const { user, onlineToken } = require('@db/index');
+const { user, onlineToken, log } = require('@db/index');
 
 const { v1 } = require('uuid'); // uuid生成
 
@@ -67,6 +67,13 @@ router.post('/login', async (ctx, next) => {
     ctx.success({
       id: result.id,
       token: tk
+    });
+    log.create({
+      type: 1,
+      token: tk,
+      originalUrl: ctx.request.originalUrl,
+      ip: ctx.request.ip,
+      userId: result.id
     });
   } else {
     ctx.error([0, '用户名或密码错误']);

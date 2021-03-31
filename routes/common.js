@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-30 10:27:53
+ * @LastEditTime: 2021-03-31 17:25:17
  * @Description:
  */
 const Table = require('root/core/tableList');
@@ -18,6 +18,10 @@ const code = {
   UNKNOWN_ERROR: [0, 'Sorry, you seem to have encountered some unknown errors.']
 };
 const pwdPath = path.resolve(__dirname);
+
+router.get('/', async (ctx, next) => {
+  ctx.success(true);
+});
 
 // 导航栏获取
 router.get('/navigation', async (ctx, next) => {

@@ -73,7 +73,7 @@ app.use(async (ctx, next) => {
   if (POSTMAN === 'Postman') {
   } else {
     // 白名单接口
-    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut'];
+    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/common'];
     if (!WHITELIST.some(element => element === ctx.request.url)) {
       const headerToken = ctx.request.header.token;
       const queryToken = ctx.query.token;
