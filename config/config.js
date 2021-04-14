@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-30 13:40:19
+ * @LastEditTime: 2021-03-31 20:35:36
  * @Description: 配置文件
  */
 /** session配置 */
@@ -18,5 +18,5 @@ const sessionConfig = {
 
 module.exports = {
   sessionConfig,
-  NODE_ENV: 'production' // production development
+  NODE_ENV: 'development' // production development
 };

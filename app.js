@@ -8,6 +8,7 @@ const logger = require('koa-logger');
 const cors = require('koa2-cors'); // 跨域中间件
 const session = require('koa-session');
 const koaSwagger = require('koa2-swagger-ui');
+const jwt = require('jsonwebtoken');
 require('module-alias/register'); // 路径别名
 
 // 路由
@@ -50,7 +51,6 @@ app.use(
   bodyparser({
     enableTypes: ['json', 'form', 'text']
   })
-
 );
 
 app.use(errorHandler); // 统一错误异常处理
@@ -73,11 +73,13 @@ app.use(async (ctx, next) => {
   if (POSTMAN === 'Postman') {
   } else {
     // 白名单接口
-    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/common'];
+    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/common']; //
     if (!WHITELIST.some(element => element === ctx.request.url)) {
       const headerToken = ctx.request.header.token;
       const queryToken = ctx.query.token;
       if (headerToken || queryToken) {
+        // const result = ctx.verifyToken(headerToken);
+        // console.log(result);
         if (headerToken && !ctx.checkToken(headerToken)) {
           return ctx.error([0, '令牌已过期！']);
         }

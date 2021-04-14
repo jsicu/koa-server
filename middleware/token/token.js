@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-26 14:36:08
+ * @LastEditTime: 2021-04-01 14:28:19
  * @Description:
  */
 const jwt = require('jsonwebtoken');
@@ -11,8 +11,8 @@ const NodeRSA = require('node-rsa');
 const path = require('path');
 const crypto = require('crypto');
 
-// const secret = 'token'; // 密钥，不能丢
-const secret = new NodeRSA({ b: 512 }).exportKey('public');
+const secret = 'token'; // 密钥，不能丢
+// const secret = new NodeRSA({ b: 512 }).exportKey('public');
 const mysql = require('../../mysql');
 
 // 获取公钥和私钥
@@ -46,6 +46,7 @@ exports.getToken = (ctx, userInfo) => {
 /**
  * token解密
  * @param String 再加密后的tokens
+ * @return String 三点式token
  */
 exports.decryptToken = (ctx, tokens) => {
   // 解密
@@ -84,8 +85,33 @@ exports.checkToken = (ctx, tokens) => {
 /**
  * token解码
  * @param String tokens
+ *@return token token解码后对象
  */
 exports.decryptRSAToken = (ctx, tokens) => {
   tokens = tokens.replace(/\s+/g, ''); // 空格替换, 超级账号换行导致会有空格
-  return jwt.decode(ctx.decryptToken(tokens), secret);
+  return jwt.decode(this.decryptToken(tokens), secret);
+};
+
+/**
+ * token验证
+ * @param String tokens
+ */
+exports.verifyToken = (ctx, token) => {
+  token = token.replace(/\s+/g, ''); // 空格替换, 超级账号换行导致会有空格
+  token = this.decryptToken(token);
+
+  try {
+    // jwt.verify方法验证token是否有效
+    jwt.verify(token, secret, {
+      complete: true
+    });
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+    // token过期 生成新的token
+    // const newToken = getToken(user);
+    // 将新token放入Authorization中返回给前端
+    // ctx.res.setHeader('Authorization', newToken);
+  }
 };
