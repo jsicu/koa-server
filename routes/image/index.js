@@ -8,6 +8,7 @@ const qr = require('qr-image');
 const send = require('koa-send');
 const Joi = require('joi'); // 参数校验
 const { v1 } = require('uuid'); // uuid生成
+const { captcha, route } = require('@db/index');
 
 router.prefix('/image');
 
@@ -17,7 +18,6 @@ let position = []; // 点击文字坐标位置
 
 // #region
 /**
- * # @swagger
  * /image/{id}:
  *   get:
  *     summary: Returns a list of users.
@@ -84,18 +84,6 @@ let position = []; // 点击文字坐标位置
 //   //   console.log('文件已被删除');
 //   // });
 // });
-
-// oauth2授权服务
-router.post('/oauth', (ctx, next) => {
-  ctx.success({
-    access_token: '36034ff7-7eea-4935-a3b7-5787d7a65827',
-    token_type: 'bearer',
-    grant_type: 'password',
-    refresh_token: '4baea735-3c0d-4dfd-b826-91c6772a0962',
-    expires_in: 36931,
-    scope: 'token'
-  });
-});
 
 // 图片下载
 router.get('/download/:name', async ctx => {
@@ -238,7 +226,7 @@ router.get('/imgList', async ctx => {
   ctx.success(Table.tableTotal(list.length, list));
 });
 
-// const { Image, createCanvas, loadImage } = require('canvas');
+const { Image, createCanvas, loadImage } = require('canvas');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms)); // 延时
 
 const w = 40; // 正方形边长
@@ -282,8 +270,8 @@ const L = w + r * 2 + 3; // 滑块实际边长
  */
 // #endregion
 router.get('/verify', async ctx => {
-  console.log(ctx.request.query);
   const { type = 0 } = ctx.request.query;
+  const uuId = v1(); // 验证uuId
   if (Number(type)) {
     const { colorList, wordsList } = require('./validationData');
 
@@ -335,7 +323,8 @@ router.get('/verify', async ctx => {
     ctx.success({
       bgCanvas: bgCanvas.toDataURL(),
       words: str.join('、'),
-      size: { width, height }
+      size: { width, height },
+      uuId
     });
   } else {
     const width = 320;
@@ -384,17 +373,21 @@ router.get('/verify', async ctx => {
 
     ctx.success({
       sliderBG: bgCanvas.toDataURL(),
-      slider: sliderCanvas.toDataURL()
+      slider: sliderCanvas.toDataURL(),
+      uuId
     });
   }
   const headerToken = ctx.request.header.token;
   const token = ctx.decryptRSAToken(headerToken);
-  let sql = `DELETE FROM captcha WHERE user_id = '${token.id}' and type='${type}'`;
-  await mysql.query(sql);
-  sql = `INSERT INTO captcha (type, user_id, check_json) VALUES ('${type}', '${token.id}', '${JSON.stringify(
-    position
-  )}')`;
-  await mysql.query(sql);
+  const data = {
+    checkJson: JSON.stringify(
+      position
+    ),
+    userId: token.id,
+    type,
+    uuId
+  };
+  const res = await captcha.create(data);
 });
 
 const { key } = require('../../utils/encryption');
@@ -441,6 +434,7 @@ const { key } = require('../../utils/encryption');
 router.post('/check', async ctx => {
   const data = ctx.request.body;
   if (!data.checkJson) return ctx.error([400, 'checkJson is required!']);
+  if (!data.uuId) return ctx.error([400, 'uuId is required!']);
 
   const headerToken = ctx.request.header.token;
   const token = ctx.decryptRSAToken(headerToken);
@@ -457,9 +451,15 @@ router.post('/check', async ctx => {
   if (data.captchaType === 0 || data.captchaType) {
     // 点击验证
     checkJson = JSON.parse(checkJson);
-    const sql = `select * from captcha where user_id='${token.id}' and type='1'`;
-    const sqlResult = await mysql.query(sql);
-    position = JSON.parse(sqlResult[0].check_json);
+    const sqlData = {
+      userId: token.id,
+      type: 1,
+      uuId: data.uuId
+    };
+    const res = await captcha.findAll({
+      where: sqlData
+    });
+    position = JSON.parse(res[0].checkJson);
 
     // 中心坐标重置
     for (const i in position) {
@@ -486,13 +486,21 @@ router.post('/check', async ctx => {
     }
   } else {
     // 滑块验证
-    const sql = `select * from captcha where user_id='${token.id}' and type='0'`;
-    const sqlResult = await mysql.query(sql);
-    const sliderLeft = Number(sqlResult[0].check_json); // 滑块移动距离
+    const sqlData = {
+      userId: token.id,
+      type: 0,
+      uuId: data.uuId
+    };
+    const res = await captcha.findAll({
+      where: sqlData
+    });
+    if (res.length === 1) {
+      const sliderLeft = Number(res[0].checkJson); // 滑块移动距离
 
-    checkJson = Number(checkJson) + 4;
-    Math.abs(checkJson - sliderLeft) < 4 ? (result = true) : (result = false);
-  }
+      checkJson = Number(checkJson) + 4;
+      Math.abs(checkJson - sliderLeft) < 4 ? (result = true) : (result = false);
+    }
+}
   ctx.success(result);
 });
 

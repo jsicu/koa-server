@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-31 17:25:17
+ * @LastEditTime: 2021-04-15 14:30:14
  * @Description:
  */
 const Table = require('root/core/tableList');
@@ -84,6 +84,117 @@ router.get('/getAll', async (ctx, next) => {
       console.log('文件已被保存');
     });
   }
+});
+
+// oauth2授权服务
+// #region
+/**
+ * @swagger
+ * /common/oauth:
+ *   post:
+ *     description: 字典
+ *     tags: [公共模块]
+ *     produces:
+ *       - application/x-www-form-urlencoded
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: 登入成功
+ *     security:
+ *       - token: []
+ */
+// #endregion
+router.post('/oauth', (ctx, next) => {
+  console.log(ctx.request.body);
+  ctx.success({
+    access_token: '36034ff7-7eea-4935-a3b7-5787d7a65827',
+    token_type: 'bearer',
+    grant_type: 'password',
+    refresh_token: '4baea735-3c0d-4dfd-b826-91c6772a0962',
+    expires_in: 36931,
+    scope: 'token'
+  });
+});
+
+// 测试
+// #region
+/**
+ * @swagger
+ * /common/test:
+ *   get:
+ *     description: 字典
+ *     tags: [公共模块]
+ *     produces:
+ *       - application/x-www-form-urlencoded
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: 登入成功
+ *     security:
+ *       - server_auth:
+ *         - "oauth2_token"
+ */
+// #endregion
+router.get('/test', async (ctx, next) => {
+  ctx.success(true);
+});
+
+// #region
+/**
+ * @swagger
+ * /common/getToken:
+ *   get:
+ *     description: 获取token
+ *     tags: [公共模块]
+ *     produces:
+ *       - application/x-www-form-urlencoded
+ *       - application/json
+ *     parameters:
+ *       -userName:
+ *        description:
+ *        in: query
+ *        type: string
+ *       -password:
+ *        description:
+ *        in: query
+ *        type: string
+ *     responses:
+ *       200:
+ *         description: 登入成功
+ *         schema:
+ *           $ref: "#/definitions/Order"
+ *       400:
+ *         $ref: "#/components/description"
+ *     security:
+ *       - token: []
+ */
+// #endregion
+router.get('/getToken', async (ctx, next) => {
+  // getIpInfo('220.181.111.85');
+  const s = '::ffff:127.0.0.1 ';
+  console.log(s.substr(s.lastIndexOf(':') + 1));
+  const APIServer = 'http://api.map.baidu.com/location/ip?ak=vxvdMjDXHROfGQnyYCzv4MoXrkEqDBYX&coor=bd09ll&ip=';
+  const url = APIServer + '117.29.158.59';
+  let resdata = {};
+  http
+    .get(url, res => {
+      console.log(res.statusCode);
+      const code = res.statusCode;
+      if (code == 200) {
+        res.on('data', data => {
+          try {
+            console.log(data.toString('utf-8'));
+            resdata = JSON.parse(data);
+            console.log(resdata);
+          } catch (err) {
+            // console.log(err);
+          }
+        });
+      } else {
+      }
+    })
+    .on('error', e => {});
+  ctx.success(true);
 });
 
 module.exports = router;

@@ -70,10 +70,12 @@ app.use(async (ctx, next) => {
   const POSTMAN = ctx.request.header['user-agent'].slice(0, 7);
   // eslint-disable-next-line dot-notation
   // const SWAGGER = ctx.request.header['referer'].slice(-7);
-  if (POSTMAN === 'Postman') {
+  if (POSTMAN === 'Postman' && global.config.NODE_ENV === 'development') {
+    // postman只能访问开发环境的服务
+    await next();
   } else {
     // 白名单接口
-    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/common']; //
+    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/common', '/common/oauth']; //
     if (!WHITELIST.some(element => element === ctx.request.url)) {
       const headerToken = ctx.request.header.token;
       const queryToken = ctx.query.token;
@@ -90,8 +92,8 @@ app.use(async (ctx, next) => {
         return ctx.error([0, 'token检验未通过！']);
       }
     }
+    await next();
   }
-  await next();
 });
 
 app.use(

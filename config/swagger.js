@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-23 19:44:27
+ * @LastEditTime: 2021-04-15 16:48:42
  * @Description: swagger配置
  */
 const router = require('koa-router')(); // 引入路由函数
@@ -35,10 +35,10 @@ const swaggerDefinition = {
     // server_auth: {
     //   type: 'oauth2',
     //   description: '描述',
-    //   tokenUrl: 'http://localhost:4000/image/oauth',
+    //   tokenUrl: 'http://localhost:4000/common/oauth',
     //   flow: 'password',
     //   scopes: {
-    //     token: 'modify pets in your account'
+    //     oauth2_token: 'modify pets in your account'
     //   }
     // },
     token: {
@@ -52,6 +52,49 @@ const swaggerDefinition = {
       name: 'token',
       in: 'header'
     }
+  },
+  components: {
+    description: {
+      description: '登入成功'
+    }
+  },
+  definitions: {
+    Order: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+          format: 'int64'
+        },
+        petId: {
+          type: 'integer',
+          format: 'int64'
+        },
+        quantity: {
+          type: 'integer',
+          format: 'int32'
+        },
+        shipDate: {
+          type: 'string',
+          format: 'date-time'
+        },
+        status: {
+          description: '状态',
+          type: 'string',
+          enum: '',
+          0: 'placed',
+          1: 'approved',
+          2: 'delivered'
+        },
+        complete: {
+          type: 'boolean',
+          default: false
+        }
+      },
+      xml: {
+        name: 'Order'
+      }
+    }
   }
 };
 const options = {
@@ -62,7 +105,7 @@ const options = {
 const swaggerSpec = swaggerJSDoc(options);
 // 通过路由获取生成的注解文件
 router.get('/swagger.json', async ctx => {
-  ctx.set('Content-Type', 'application/json');
+  ctx.set('Content-Type', 'application/json'); // , application/x-www-form-urlencoded
   ctx.body = swaggerSpec;
 });
 

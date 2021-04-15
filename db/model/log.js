@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-03-31 17:44:24
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-31 18:08:51
+ * @LastEditTime: 2021-04-14 21:57:39
  * @Description: 日志表
  */
 const Sequelize = require('sequelize');
@@ -37,6 +37,14 @@ const log = seq.define(
       type: Sequelize.STRING(500),
       comment: 'token',
       allowNull: false
+    },
+    point: {
+      type: Sequelize.STRING(50),
+      comment: '坐标'
+    },
+    address: {
+      type: Sequelize.STRING(50),
+      comment: '所在地'
     }
   },
   {

@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-03-16 15:49:37
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-25 17:35:20
+ * @LastEditTime: 2021-04-15 16:53:16
  * @Description: 自动加载路由
  */
 const requireDirectory = require('require-directory');
@@ -26,7 +26,7 @@ class InitManager {
     function whenLoadModule(obj) {
       if (obj instanceof Router) {
         // 路由黑名单
-        const blackList = ['/image'];
+        const blackList = [];
         const prefix = obj.opts.prefix;
         if (!blackList.includes(prefix)) {
           InitManager.app.use(obj.routes());

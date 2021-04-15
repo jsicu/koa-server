@@ -2,13 +2,16 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-16 22:14:16
+ * @LastEditTime: 2021-04-15 16:45:40
  * @Description: mysql配置
  */
 const mq = require('mysql2');
 const config = require('./config/sql.json');
+const proSql = require('./sql.json');
 
-const SQL_CFG = global.config.NODE_ENV === 'development' ? config.dev : config.pro;
+const SQL_CFG = global.config.NODE_ENV === 'development' ? config.dev : proSql;
+// 如有报错使用下面这个
+// const SQL_CFG = global.config.NODE_ENV === 'development' ? config.dev : config.pro;
 const mysql = mq.createConnection(SQL_CFG);
 
 mysql.connect(err => {

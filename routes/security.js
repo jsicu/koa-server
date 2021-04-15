@@ -3,6 +3,7 @@ const paramCheck = require('../utils/paramCheck');
 const Joi = require('joi'); // 参数校验
 const fs = require('fs'); // 引入fs模块
 const crypto = require('crypto'); // 引入fs模块
+const http = require('http');
 const { user, onlineToken, log } = require('@db/index');
 
 const { v1 } = require('uuid'); // uuid生成
@@ -75,6 +76,25 @@ router.post('/login', async (ctx, next) => {
       ip: ctx.request.ip,
       userId: result.id
     });
+    const ip = ctx.request.ip;
+    const APIServer = 'http://api.map.baidu.com/location/ip?ak=vxvdMjDXHROfGQnyYCzv4MoXrkEqDBYX&coor=bd09ll&ip=';
+    const url = APIServer + ip.substr(ip.lastIndexOf(':') + 1);
+    http
+      .get(url, res => {
+        console.log(res.statusCode);
+        const code = res.statusCode;
+        if (code == 200) {
+          res.on('data', data => {
+            try {
+              console.log(JSON.parse(data));
+            } catch (err) {
+              console.log(err);
+            }
+          });
+        } else {
+        }
+      })
+      .on('error', e => {});
   } else {
     ctx.error([0, '用户名或密码错误']);
   }
@@ -151,7 +171,7 @@ router.get('/publicKey', async (ctx, next) => {
  *       '404':
  *         description: not found
  *     security:
- *       - token: {}
+ *       - token: []
  */
 // #endregion
 router.post('/logout', async (ctx, next) => {

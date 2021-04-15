@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@koa/multer": "^3.0.0",
+    "canvas": "^2.7.0",
     "debug": "^4.1.1",
     "joi": "^17.1.1",
     "jsonwebtoken": "^8.5.1",

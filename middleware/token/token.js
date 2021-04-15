@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-04-01 14:28:19
+ * @LastEditTime: 2021-04-15 17:50:41
  * @Description:
  */
 const jwt = require('jsonwebtoken');
@@ -88,8 +88,19 @@ exports.checkToken = (ctx, tokens) => {
  *@return token token解码后对象
  */
 exports.decryptRSAToken = (ctx, tokens) => {
-  tokens = tokens.replace(/\s+/g, ''); // 空格替换, 超级账号换行导致会有空格
-  return jwt.decode(this.decryptToken(tokens), secret);
+  tokens = tokens.replace(/\s+/g, ''); // 空格替换
+  // 解密
+  const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
+  // 使用相同的算法、密钥和 iv 进行加密
+  let decrypted = decipher.update(tokens, 'hex', 'utf8');
+  try {
+    decrypted += decipher.final('utf8');
+  } catch (error) {
+    return false;
+  }
+  // decrypted += decipher.final('utf8');
+  const decoded = jwt.decode(decrypted, secret);
+  return decoded;
 };
 
 /**
