@@ -62,11 +62,12 @@ router.post('/login', async (ctx, next) => {
   const res = await user.findAll({
     where: required
   });
+  let loginSuccess = false;
   if (res.length > 0) {
-    const result = res[0].dataValues;
-    const tk = ctx.getToken({ name: result.userName, id: result.id }); // token中要携带的信息，自己定义
+    loginSuccess = true;
+    const tk = ctx.getToken({ name: res[0].userName, id: res[0].id }); // token中要携带的信息，自己定义
     ctx.success({
-      id: result.id,
+      id: res[0].id,
       token: tk
     });
     log.create({
@@ -74,29 +75,31 @@ router.post('/login', async (ctx, next) => {
       token: tk,
       originalUrl: ctx.request.originalUrl,
       ip: ctx.request.ip,
-      userId: result.id
+      userId: res[0].id
     });
-    const ip = ctx.request.ip;
+  } else {
+    ctx.error([0, '用户名或密码错误']);
+  }
+
+  // ip所在地查询
+  if (loginSuccess) {
+    const ip = ctx.request.ip.substr(ctx.request.ip.lastIndexOf(':') + 1);
     const APIServer = 'http://api.map.baidu.com/location/ip?ak=vxvdMjDXHROfGQnyYCzv4MoXrkEqDBYX&coor=bd09ll&ip=';
-    const url = APIServer + ip.substr(ip.lastIndexOf(':') + 1);
+    const url = APIServer + ip;
     http
       .get(url, res => {
-        console.log(res.statusCode);
         const code = res.statusCode;
         if (code == 200) {
-          res.on('data', data => {
+          res.on('data', async data => {
             try {
-              console.log(JSON.parse(data));
+              const content = JSON.parse(data).content;
+              log.update({ address: content.address, point: JSON.stringify(content.point) }, { where: { ip: ctx.request.ip } });
             } catch (err) {
               console.log(err);
             }
           });
-        } else {
         }
-      })
-      .on('error', e => {});
-  } else {
-    ctx.error([0, '用户名或密码错误']);
+      });
   }
 });
 
