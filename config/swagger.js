@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-04-15 16:48:42
+ * @LastEditTime: 2021-04-16 15:40:35
  * @Description: swagger配置
  */
 const router = require('koa-router')(); // 引入路由函数
@@ -27,7 +27,7 @@ const swaggerDefinition = {
       url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
     }
   },
-  host: global.config.NODE_ENV === 'development' ? 'localhost:4000' : '139.9.51.227:4000',
+  host: global.config.NODE_ENV === 'development' ? 'localhost:4000' : 'localhost:4000',
   basePath: '/', // Base path (optional), host/basePath
   schemes: ['http', 'https'],
   securityDefinitions: {

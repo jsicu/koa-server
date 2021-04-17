@@ -4,7 +4,7 @@ const Joi = require('joi'); // 参数校验
 const fs = require('fs'); // 引入fs模块
 const crypto = require('crypto'); // 引入fs模块
 const http = require('http');
-const { user, onlineToken, log } = require('@db/index');
+const models = require('@db/index');
 
 const { v1 } = require('uuid'); // uuid生成
 
@@ -59,7 +59,8 @@ router.post('/login', async (ctx, next) => {
   hmac.update(required.password);
   required.password = hmac.digest('hex');
   required = { ...required, isCancel: 0 };
-  const res = await user.findAll({
+  console.log(models);
+  const res = await models.user.findAll({
     where: required
   });
   let loginSuccess = false;
@@ -70,7 +71,7 @@ router.post('/login', async (ctx, next) => {
       id: res[0].id,
       token: tk
     });
-    log.create({
+    models.log.create({
       type: 1,
       token: tk,
       originalUrl: ctx.request.originalUrl,
@@ -86,20 +87,22 @@ router.post('/login', async (ctx, next) => {
     const ip = ctx.request.ip.substr(ctx.request.ip.lastIndexOf(':') + 1);
     const APIServer = 'http://api.map.baidu.com/location/ip?ak=vxvdMjDXHROfGQnyYCzv4MoXrkEqDBYX&coor=bd09ll&ip=';
     const url = APIServer + ip;
-    http
-      .get(url, res => {
-        const code = res.statusCode;
-        if (code == 200) {
-          res.on('data', async data => {
-            try {
-              const content = JSON.parse(data).content;
-              log.update({ address: content.address, point: JSON.stringify(content.point) }, { where: { ip: ctx.request.ip } });
-            } catch (err) {
-              console.log(err);
-            }
-          });
-        }
-      });
+    http.get(url, res => {
+      const code = res.statusCode;
+      if (code == 200) {
+        res.on('data', async data => {
+          try {
+            const content = JSON.parse(data).content;
+            models.log.update(
+              { address: content?.address, point: JSON.stringify(content?.point) },
+              { where: { ip: ctx.request.ip } }
+            );
+          } catch (err) {
+            console.log(err);
+          }
+        });
+      }
+    });
   }
 });
 
@@ -179,7 +182,7 @@ router.get('/publicKey', async (ctx, next) => {
 // #endregion
 router.post('/logout', async (ctx, next) => {
   const decryptTk = ctx.decryptToken(ctx.request.header.token);
-  await onlineToken.destroy({ where: { token: decryptTk } });
+  models.onlineToken.destroy({ where: { token: decryptTk } });
   ctx.success(true);
 });
 
@@ -290,7 +293,7 @@ router.post('/register', async (ctx, next) => {
   hmac.update(required.password);
   required.password = hmac.digest('hex');
 
-  await user.create(required);
+  models.user.create(required);
   ctx.success(true);
 });
 

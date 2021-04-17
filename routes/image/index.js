@@ -8,7 +8,7 @@ const qr = require('qr-image');
 const send = require('koa-send');
 const Joi = require('joi'); // 参数校验
 const { v1 } = require('uuid'); // uuid生成
-const { captcha, route } = require('@db/index');
+const models = require('@db/index');
 
 router.prefix('/image');
 
@@ -387,7 +387,7 @@ router.get('/verify', async ctx => {
     type,
     uuId
   };
-  const res = await captcha.create(data);
+  const res = await models.captcha.create(data);
 });
 
 const { key } = require('../../utils/encryption');
@@ -456,7 +456,7 @@ router.post('/check', async ctx => {
       type: 1,
       uuId: data.uuId
     };
-    const res = await captcha.findAll({
+    const res = await models.captcha.findAll({
       where: sqlData
     });
     position = JSON.parse(res[0].checkJson);
@@ -491,7 +491,7 @@ router.post('/check', async ctx => {
       type: 0,
       uuId: data.uuId
     };
-    const res = await captcha.findAll({
+    const res = await models.captcha.findAll({
       where: sqlData
     });
     if (res.length === 1) {

@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-03-01 19:36:54
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-30 10:19:38
+ * @LastEditTime: 2021-04-17 20:57:52
  * @Description: 大屏接口
  */
 const mysql = require('root/mysql');
@@ -10,7 +10,7 @@ const Table = require('root/core/tableList'); // 列表返回格式
 const router = require('koa-router')();
 const sql = require('./sql');
 const Joi = require('joi'); // 参数校验
-const { scenicSpot } = require('@db/index');
+const models = require('@db/index');
 const { Op } = require('sequelize');
 router.prefix('/bigScreen');
 
@@ -58,7 +58,7 @@ router.get('/dest', async ctx => {
   const required = { destId };
   const value = schema.validate(required);
   if (value.error) throw new global.err.ParamError(value.error.message);
-  const res = await scenicSpot.findAll({
+  const res = await models.scenicSpot.findAll({
     where: required
   });
   ctx.success(res);
@@ -73,7 +73,7 @@ router.post('/dest', async ctx => {
   const required = { destName };
   const value = schema.validate(required);
   if (value.error) throw new global.err.ParamError(value.error.message);
-  const res = await scenicSpot.create(data);
+  const res = await models.scenicSpot.create(data);
   ctx.success(res);
 });
 
@@ -87,7 +87,7 @@ router.put('/dest', async ctx => {
   const required = { destId, destName };
   const value = schema.validate(required);
   if (value.error) throw new global.err.ParamError(value.error.message);
-  const res = await scenicSpot.update(data, { where: { destId: data.destId } });
+  const res = await models.scenicSpot.update(data, { where: { destId: data.destId } });
   if (res[0] === 1) {
     ctx.success(true);
   } else {
@@ -104,7 +104,7 @@ router.delete('/dest', async ctx => {
   const required = { destId };
   const value = schema.validate(required);
   if (value.error) throw new global.err.ParamError(value.error.message);
-  const res = await scenicSpot.destroy({ where: data });
+  const res = await models.scenicSpot.destroy({ where: data });
   if (res === 1) {
     ctx.success(true);
   } else {
@@ -173,7 +173,7 @@ router.get('/list', async ctx => {
       search[i] = { [Op.substring]: required[i] };
     }
   }
-  const { count, rows } = await scenicSpot.findAndCountAll({
+  const { count, rows } = await models.scenicSpot.findAndCountAll({
     offset: (pageNum - 1) * pageSize,
     limit: pageSize - 0,
     where: search

@@ -2,12 +2,12 @@
  * @Author: linzq
  * @Date: 2021-03-23 14:24:09
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-31 17:41:55
+ * @LastEditTime: 2021-04-17 23:44:01
  * @Description: 模型数据库同步
  */
 
 const sequelize = require('./db/db.js');
-require('./db/index');
+require('./models/init-models.js')(sequelize); // models\init-models.js
 sequelize
   .sync({
     force: false // 如果表已经存在，则删除表后再创建

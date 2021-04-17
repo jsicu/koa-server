@@ -6,7 +6,8 @@
     "start": "nodemon bin/www",
     "dev": "./node_modules/.bin/nodemon bin/www",
     "prd": "pm2 start bin/www --name=koaServer --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "models": "sequelize-auto -h localhost -d koa2_server -u root -x password -p 3306 -o ./db/models -e mysql -a ./config/db.json --caseProp c --caseModel c"
   },
   "dependencies": {
     "@koa/multer": "^3.0.0",

@@ -2,14 +2,15 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-04-15 14:30:14
+ * @LastEditTime: 2021-04-17 23:34:49
  * @Description:
  */
 const Table = require('root/core/tableList');
 const router = require('koa-router')();
 const path = require('path');
 const fs = require('fs');
-const { dictionary, route } = require('@db/index');
+const models = require('@db/index');
+
 const seq = require('@db/db');
 
 router.prefix('/common');
@@ -25,7 +26,7 @@ router.get('/', async (ctx, next) => {
 
 // 导航栏获取
 router.get('/navigation', async (ctx, next) => {
-  const res = await route.findAll({
+  const res = await models.route.findAll({
     attributes: ['id', 'name', 'alias'],
     where: { status: 1 }
   });
@@ -54,13 +55,13 @@ router.get('/getAll', async (ctx, next) => {
     ctx.success(data);
   } else {
     // const ids = await seq.query('SELECT DISTINCT dict_id from dictionary;');
-    let ids = await dictionary.findAll({
+    let ids = await models.dictionary.findAll({
       attributes: ['dictId'],
       group: 'dictId'
     });
     const res = JSON.parse(
       JSON.stringify(
-        await dictionary.findAll({
+        await models.dictionary.findAll({
           attributes: ['dictId', 'label', 'value']
         })
       )

@@ -2,18 +2,18 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-04-15 17:50:41
- * @Description:
+ * @LastEditTime: 2021-04-17 23:35:41
+ * @Description: token相关
  */
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const NodeRSA = require('node-rsa');
 const path = require('path');
 const crypto = require('crypto');
+const models = require('@db/index');
 
 const secret = 'token'; // 密钥，不能丢
 // const secret = new NodeRSA({ b: 512 }).exportKey('public');
-const mysql = require('../../mysql');
 
 // 获取公钥和私钥
 // const publicKey = fs.readFileSync(path.join(__dirname, '/rsa_public_key.pem'));
@@ -34,8 +34,12 @@ const iv = Buffer.alloc(16, 16); // 初始化向量。
 exports.getToken = (ctx, userInfo) => {
   // 创建token并导出
   const token = jwt.sign(userInfo, secret, { expiresIn: '8h' });
-  const sql = `INSERT INTO online_token (token, user_id) VALUES ('${token}', '${userInfo.id}')`; // 存入token
-  mysql.query(sql);
+  const data = {
+    token,
+    userId: userInfo.id
+  };
+  models.onlineToken.create(data);
+
   // token加密
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
   let encrypted = cipher.update(token, 'utf8', 'hex');
