@@ -59,17 +59,18 @@ router.post('/login', async (ctx, next) => {
   hmac.update(required.password);
   required.password = hmac.digest('hex');
   required = { ...required, isCancel: 0 };
-  console.log(models);
   const res = await models.user.findAll({
     where: required
   });
   let loginSuccess = false;
   if (res.length > 0) {
     loginSuccess = true;
-    const tk = ctx.getToken({ name: res[0].userName, id: res[0].id }); // token中要携带的信息，自己定义
+    const tk = ctx.getToken({ name: res[0].userName, id: res[0].id }, global.config.refreshTime); // token中要携带的信息，自己定义
+    const refreshTk = ctx.getToken({ name: res[0].userName, id: res[0].id }, '1d'); // token中要携带的信息，自己定义
     ctx.success({
       id: res[0].id,
-      token: tk
+      token: tk,
+      refreshToken: refreshTk
     });
     models.log.create({
       type: 1,

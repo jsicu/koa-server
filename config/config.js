@@ -2,21 +2,37 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-04-17 18:20:42
+ * @LastEditTime: 2021-04-20 17:28:54
  * @Description: 配置文件
  */
-/** session配置 */
-const sessionConfig = {
-  key: 'koa:sess', // cookie key (默认koa：sess)
-  maxAge: 10000, // cookie的过期时间,毫秒，默认为1天(86400000)
-  overwrite: true, // 是否覆盖    (默认default true)
-  httpOnly: false, // cookie是否只有服务器端可以访问,默认为true
-  signed: true, // 签名默认true
-  rolling: false, // 在每次请求时强行设置cookie，这将重置cookie过期时间（默认：false）
-  renew: false // (boolean) 会话即将到期时,续订会话
+// sql配置
+const sql = {
+  pro: {
+    host: 'localhost',
+    port: 3306,
+    user: 'admin',
+    password: 'l@admin',
+    database: 'koa2_server',
+    multipleStatements: true
+  },
+  dev: {
+    host: 'localhost',
+    port: 3306,
+    user: 'root',
+    password: 'password',
+    database: 'koa2_server',
+    multipleStatements: true
+  }
+};
+const redis = {
+  host: '127.0.0.1',
+  port: 6379
 };
 
 module.exports = {
-  sessionConfig,
-  NODE_ENV: 'development' // production development
+  NODE_ENV: 'development', // production development
+  dev: sql.dev,
+  pro: sql.pro,
+  redis,
+  refreshTime: '2h' // 刷新token提前时间，单位：秒
 };

@@ -73,12 +73,12 @@ const formatText = {
     logText += '*************** info log end ***************' + '\n';
     return logText;
   },
-  error: function (ctx, err, resTime) {
+  error: function (err, type) {
     let logText = '';
     // 错误信息开始
     logText += '\n' + '*************** error log start ***************' + '\n';
-    // 添加请求日志
-    logText += formatText.request(ctx.request, resTime);
+    // 错误类型
+    logText += 'err type: ' + type + '\n';
     // 错误名称
     logText += 'err name: ' + err.name + '\n';
     // 错误信息
@@ -111,9 +111,9 @@ module.exports = {
     }
   },
   // 封装错误日志
-  logError: function (ctx, error, resTime) {
-    if (ctx && error) {
-      errorLogger.error(formatText.error(ctx, error, resTime));
+  logError: function (error, type=undefined) {
+    if (error) {
+      errorLogger.error(formatText.error(error, type));
     }
   }
 };

@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-26 14:06:39
+ * @LastEditTime: 2021-04-20 17:28:38
  * @Description: 统一接口返回格式
  */
 
@@ -15,16 +15,27 @@
  * @param code 错误码 || [错误码, 错误描述]
  * @param message 错误描述
  */
-exports.response = (ctx, data, code, message) => {
+exports.response = async (ctx, data, code, message) => {
   if (typeof code == 'object') {
     message = code[1];
     code = code[0];
   }
-  ctx.body = {
+  // refreshToken
+  if (ctx.request.header.refresh_token) {
+    ctx.res.setHeader('Authorization', ctx.getToken(ctx.request.header.token, global.config.refreshTime));
+  } else if (ctx.response.header.refresh) {
+    return (ctx.body = {
+      code,
+      data,
+      message,
+      refresh: true
+    });
+  }
+  return (ctx.body = {
     code,
     data,
     message
-  };
+  });
 };
 
 /**

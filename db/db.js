@@ -2,19 +2,18 @@
  * @Author: linzq
  * @Date: 2021-03-23 11:30:43
  * @LastEditors: linzq
- * @LastEditTime: 2021-04-15 16:47:36
+ * @LastEditTime: 2021-04-19 11:25:03
  * @Description: Sequelize
  */
-
+// 不可使用别名
 const Sequelize = require('sequelize');
 const config = require('../config/config.js');
-const sql = require('../config/sql.json');
 const proSql = require('../sql.json');
 
 // 数据库信息
-const db = config.NODE_ENV === 'development' ? sql.dev : proSql;
+const db = config.NODE_ENV === 'development' ? config.dev : proSql;
 // 如有报错使用下面这个
-// const db = config.NODE_ENV === 'development' ? sql.dev : sql.pro;
+// const db = config.NODE_ENV === 'development' ? config.dev : config.pro;
 
 // 连接数据库
 const sequelize = new Sequelize(db.database, db.user, db.password, {

@@ -23,7 +23,6 @@
     "koa-onerror": "^4.1.0",
     "koa-router": "^7.4.0",
     "koa-send": "^5.0.1",
-    "koa-session": "^6.0.0",
     "koa-static": "^5.0.0",
     "koa-views": "^6.2.0",
     "koa2-cors": "^2.0.6",
@@ -35,11 +34,13 @@
     "mysql2": "^2.1.0",
     "node-rsa": "^1.0.8",
     "nodemailer": "^6.4.10",
-    "pug": "^2.0.3",
+    "pug": "^3.0.1",
     "qr-image": "^3.2.0",
+    "redis": "^3.1.1",
     "require-directory": "^2.1.1",
     "sequelize": "^6.6.1",
-    "swagger-jsdoc": "^4.0.0"
+    "swagger-jsdoc": "^4.0.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
@@ -54,6 +55,21 @@
   },
   "_moduleAliases": {
     "root": ".",
-    "@db": "./db"
+    "@db": "./db",
+    "@config": "./config/config",
+    "@redis": "./core/redis"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jsicu/koa-server.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jsicu/koa-server/issues"
+  },
+  "homepage": "https://github.com/jsicu/koa-server",
+  "engines": {
+    "node": ">=14",
+    "mysql": ">=8.0"
   }
 }

@@ -6,7 +6,6 @@ const onerror = require('koa-onerror');
 const bodyparser = require('koa-bodyparser');
 const logger = require('koa-logger');
 const cors = require('koa2-cors'); // 跨域中间件
-const session = require('koa-session');
 const koaSwagger = require('koa2-swagger-ui');
 const jwt = require('jsonwebtoken');
 require('module-alias/register'); // 路径别名
@@ -30,19 +29,17 @@ let ms = 0; // 接口耗时
 // swagger配置
 const swagger = require('./config/swagger');
 app.use(swagger.routes(), swagger.allowedMethods());
-app.use(
-  koaSwagger({
-    routePrefix: '/swagger', // host at /swagger instead of default /docs
-    swaggerOptions: {
-      url: '/swagger.json' // example path to json
-    }
-  })
-);
-
-// 使用session
-// app.keys = ['secret'];
-// const { sessionConfig } = require('./config/config');
-// app.use(session(sessionConfig, app));
+// 生产环境取消swagger
+if (global.config.NODE_ENV === 'development') {
+  app.use(
+    koaSwagger({
+      routePrefix: '/swagger', // host at /swagger instead of default /docs
+      swaggerOptions: {
+        url: '/swagger.json' // example path to json
+      }
+    })
+  );
+}
 
 // error handler
 onerror(app);
@@ -56,7 +53,22 @@ app.use(
 app.use(errorHandler); // 统一错误异常处理
 app.use(validate); // 验证
 app.use(response); // 返回体中间件
-app.use(cors()); // 设置允许跨域访问该服务.
+app.use(
+  cors({
+    // origin: function (ctx) {
+    //   if (ctx.url === '/test') {
+    //     return '*'; // 允许来自所有域名请求
+    //   }
+    //   return 'http://localhost:3999'; // 这样就能只允许 http://localhost:8080 这个域名的请求了
+    // },
+    exposeHeaders: ['Authorization'],
+    // maxAge: 3600,
+    // credentials: true,
+    // allowMethods: ['GET', 'POST', 'DELETE', 'PUT'],
+    // allowHeaders: ['refresh_token', 'token']
+  })
+); // 设置允许跨域访问该服务.
+// app.use(cors()); // 设置允许跨域访问该服务.
 app.use(token); // token
 app.use(myLog); // 日志中间件
 app.use(json());
@@ -75,17 +87,12 @@ app.use(async (ctx, next) => {
     await next();
   } else {
     // 白名单接口
-    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/common']; //
+    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/index']; //, '/common'
     if (!WHITELIST.some(element => element === ctx.request.url)) {
       const headerToken = ctx.request.header.token;
       const queryToken = ctx.query.token;
       if (headerToken || queryToken) {
-        // const result = ctx.verifyToken(headerToken);
-        // console.log(result);
-        if (headerToken && !ctx.checkToken(headerToken)) {
-          return ctx.error([0, '令牌已过期！']);
-        }
-        if (queryToken && !ctx.checkToken(queryToken)) {
+        if (!ctx.checkToken(headerToken || queryToken)) {
           return ctx.error([0, '令牌已过期！']);
         }
       } else {

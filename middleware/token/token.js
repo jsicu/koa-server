@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-04-17 23:35:41
+ * @LastEditTime: 2021-04-20 17:28:46
  * @Description: token相关
  */
 const jwt = require('jsonwebtoken');
@@ -31,9 +31,17 @@ const iv = Buffer.alloc(16, 16); // 初始化向量。
  * token生成
  * @param Object userInfo
  */
-exports.getToken = (ctx, userInfo) => {
+exports.getToken = (ctx, userInfo, time) => {
+  // 为解码的token
+  if (typeof userInfo === 'string') {
+    const obj = this.decryptRSAToken('', userInfo);
+    userInfo = {
+      name: obj.name,
+      id: obj.id
+    };
+  }
   // 创建token并导出
-  const token = jwt.sign(userInfo, secret, { expiresIn: '8h' });
+  const token = jwt.sign(userInfo, secret, { expiresIn: time }); // 60, "2 days", "10h", "7d".
   const data = {
     token,
     userId: userInfo.id
@@ -82,8 +90,14 @@ exports.checkToken = (ctx, tokens) => {
   }
   // decrypted += decipher.final('utf8');
   const decoded = jwt.decode(decrypted, secret);
+  // 600秒过期预警
+  if (decoded.exp > new Date() / 1000 && decoded.exp < new Date() / 1000 + 600) {
+    ctx.append('refresh', true);
+  } else {
+    ctx.remove('refresh');
+  }
+
   return !(decoded && decoded.exp <= new Date() / 1000);
-  // }
 };
 
 /**
@@ -113,11 +127,19 @@ exports.decryptRSAToken = (ctx, tokens) => {
  */
 exports.verifyToken = (ctx, token) => {
   token = token.replace(/\s+/g, ''); // 空格替换, 超级账号换行导致会有空格
-  token = this.decryptToken(token);
+
+  const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
+  // 使用相同的算法、密钥和 iv 进行加密
+  let decrypted = decipher.update(token, 'hex', 'utf8');
+  try {
+    decrypted += decipher.final('utf8');
+  } catch (error) {
+    return false;
+  }
 
   try {
     // jwt.verify方法验证token是否有效
-    jwt.verify(token, secret, {
+    jwt.verify(decrypted, secret, {
       complete: true
     });
     return true;

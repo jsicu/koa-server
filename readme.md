@@ -34,10 +34,24 @@
 
 - node >= 10.0.0
 -  mysql 数据库>= 8.0
+-  redis
+
+
+
+#### 其他依赖
+
+```shell
+// 这是用来导出数据库已有表模型时需要的依赖
+npm i -g sequelize sequelize-auto mysql2
+```
+
+
 
 #### 了解目录结构
 
 打开treer.md文件，查看项目目录结构，让你更快的使用或修改
+
+
 
 #### 安装依赖
 
@@ -49,6 +63,8 @@ git clone https://gitee.com/jsicu/koa-server.git
 npm install --registry=https://registry.npm.taobao.org
 ```
 
+
+
 #### 数据库创建
 
 在这我使用sequelize库创建数据库模型，步骤如下：
@@ -57,11 +73,15 @@ npm install --registry=https://registry.npm.taobao.org
 - 控制台输入：node dbSync.js 同步数据库模型，此时在数据库里就创建了几个基本的表
 - 使用navicat或者其他工具在新建好的数据库中插入数据，数据插入指令在**./data.sql** 中，直接复制到navicat的查询中运行即可
 
+
+
 #### 运行项目
 
 ```shell
 npm run start
 ```
+
+
 
 #### 打开swagger
 
@@ -71,7 +91,7 @@ npm run start
 
 ### 注意事项
 
-该项目中用到了canvas@2.7.0库，本地运行使用没有问题，如果要使用这个包并部署到linux服务器上可能会报错，所以我将用到这个库的模块注释掉了
+该项目中用到了canvas@2.7.0库，本地运行使用没有问题，如果要使用这个包并部署到linux服务器上可能会报错。
 
 
 
