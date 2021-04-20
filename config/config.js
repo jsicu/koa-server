@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-04-20 17:28:54
+ * @LastEditTime: 2021-04-20 19:06:18
  * @Description: 配置文件
  */
 // sql配置
@@ -30,7 +30,7 @@ const redis = {
 };
 
 module.exports = {
-  NODE_ENV: 'development', // production development
+  NODE_ENV: 'production', // production development
   dev: sql.dev,
   pro: sql.pro,
   redis,
