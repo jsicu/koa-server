@@ -2,16 +2,12 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-01 19:51:35
+ * @LastEditTime: 2021-04-16 15:40:35
  * @Description: swagger配置
- */
-/**
- * @author: linzq
- * @date: 2020/07/20
- * @description: swagger配置
  */
 const router = require('koa-router')(); // 引入路由函数
 const swaggerJSDoc = require('swagger-jsdoc');
+
 const swaggerDefinition = {
   info: {
     description:
@@ -31,7 +27,7 @@ const swaggerDefinition = {
       url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
     }
   },
-  host: 'localhost:4000',
+  host: global.config.NODE_ENV === 'development' ? 'localhost:4000' : 'localhost:4000',
   basePath: '/', // Base path (optional), host/basePath
   schemes: ['http', 'https'],
   securityDefinitions: {
@@ -39,10 +35,10 @@ const swaggerDefinition = {
     // server_auth: {
     //   type: 'oauth2',
     //   description: '描述',
-    //   tokenUrl: 'http://localhost:4000/image/oauth',
+    //   tokenUrl: 'http://localhost:4000/common/oauth',
     //   flow: 'password',
     //   scopes: {
-    //     token: 'modify pets in your account'
+    //     oauth2_token: 'modify pets in your account'
     //   }
     // },
     token: {
@@ -56,6 +52,49 @@ const swaggerDefinition = {
       name: 'token',
       in: 'header'
     }
+  },
+  components: {
+    description: {
+      description: '登入成功'
+    }
+  },
+  definitions: {
+    Order: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+          format: 'int64'
+        },
+        petId: {
+          type: 'integer',
+          format: 'int64'
+        },
+        quantity: {
+          type: 'integer',
+          format: 'int32'
+        },
+        shipDate: {
+          type: 'string',
+          format: 'date-time'
+        },
+        status: {
+          description: '状态',
+          type: 'string',
+          enum: '',
+          0: 'placed',
+          1: 'approved',
+          2: 'delivered'
+        },
+        complete: {
+          type: 'boolean',
+          default: false
+        }
+      },
+      xml: {
+        name: 'Order'
+      }
+    }
   }
 };
 const options = {
@@ -66,7 +105,7 @@ const options = {
 const swaggerSpec = swaggerJSDoc(options);
 // 通过路由获取生成的注解文件
 router.get('/swagger.json', async ctx => {
-  ctx.set('Content-Type', 'application/json');
+  ctx.set('Content-Type', 'application/json'); // , application/x-www-form-urlencoded
   ctx.body = swaggerSpec;
 });
 

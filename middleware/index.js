@@ -17,7 +17,7 @@ exports.checkPath = (ctx, path) => {
     fs.accessSync(path);
     return true;
   } catch (err) {
-    ctx.errorLog(err, '文件不存在！');
+    ctx.errorLog('文件不存在！', err);
     return false;
   }
 };

@@ -78,18 +78,19 @@ const formatText = {
     logText += '*************** info log end ***************' + '\n';
     return logText;
   },
-  error: function (ctx, err, resTime) {
+  error: function (ctx, err, detail) {
     let logText = '';
     // 错误信息开始
     logText += '\n' + '*************** error log start ***************' + '\n';
     // 添加请求日志
-    logText += formatText.request(ctx.request, resTime);
+    logText += formatText.request(ctx.request, 0);
     // 错误名称
     logText += 'err name: ' + err.name + '\n';
     // 错误信息
     logText += 'err message: ' + (err.message || err) + '\n';
     // 错误详情
     logText += 'err stack: ' + err.stack + '\n';
+    logText += 'err detail: ' + detail + '\n';
     // 错误信息结束
     logText += '*************** error log end ***************' + '\n';
     return logText;
@@ -128,10 +129,10 @@ exports.logHandle = res => {
 /**
  * 程序运行报错日志
  * @param [String] error 报错类型
- * @param [number] resTime 响应耗时
+ * @param [String] detail 报错细节
  */
-exports.logError = (ctx, error, resTime) => {
+exports.logError = (ctx, error, detail = '') => {
   if (ctx && error) {
-    errorLogger.error(formatText.error(ctx, error, resTime));
+    errorLogger.error(formatText.error(ctx, detail, error));
   }
 };

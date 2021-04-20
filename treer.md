@@ -1,38 +1,43 @@
-E:\代码\koa2-server
+F:\koa-server
 ├─.editorconfig
 ├─.eslintrc.js
 ├─.prettierrc
-├─app.js
-├─koa2-server.sql
-├─mysql.js
+├─app.js // 项目入口
+├─dbSync.js // 数据库模型同步脚本
+├─data.sql // 基础运行数据，账号路由，可视化数据
+├─LICENSE
+├─mysql.js // 数据库操作，后期使用Sequelize.js
 ├─package-lock.json
 ├─package.json
 ├─readme.md
-├─treer.md
+├─treer.md  // 目录结构介绍
 ├─views
 |   ├─error.pug
 |   ├─index.pug
 |   └layout.pug
-├─utils
-|   ├─index.js
+├─utils // 公共函数文件夹
+|   ├─encryption.js
+|   ├─logs.js
 |   └paramCheck.js
-├─static
-|   ├─xxx
-├─routes
+├─static // 静态文件夹
+├─routes //路由，api服务接口
+|   ├─common.js
 |   ├─index.js
 |   ├─security.js
-|   ├─users.js
 |   ├─image
-|   |   ├─1.png
 |   |   ├─index.js
+|   |   ├─sql.js
+|   |   ├─validationData.js
 |   |   ├─assets
+|   |   ├─asset
+|   ├─bigScreen
+|   |     ├─index.js
+|   |     └sql.js
 ├─public
-|   ├─uploads
 |   ├─stylesheets
 |   |      └style.css
-|   ├─javascripts
-|   ├─images
-├─middleware
+├─middleware // 中间件
+|     ├─index.js
 |     ├─token
 |     |   ├─index.js
 |     |   ├─rsa_private_key.pem
@@ -41,11 +46,35 @@ E:\代码\koa2-server
 |     ├─response
 |     |    ├─index.js
 |     |    └response.js
+|     ├─log
+|     |  ├─index.js
+|     |  └log.js
 |     ├─errorHandler
 |     |      └index.js
-├─config
+├─logs // 日志系统
+|  ├─response
+|  ├─handle
+|  ├─error
+|  ├─console
+├─db // Sequelize数据库模型
+| ├─db.js
+| ├─index.js
+| ├─model // 数据库模型
+| |   ├─captcha.js
+| |   ├─dictionary.js
+| |   ├─onlineToken.js
+| |   ├─route.js
+| |   ├─scenicSpot.js
+| |   └user.js
+├─core // 核心文件夹
+|  ├─http-exception.js
+|  ├─init.js
+|  └tableList.js
+├─config // 配置信息文件夹
 |   ├─config.js
+|   ├─logs.js
 |   ├─nodemailer.js
+|   ├─sql.json // 数据库参数
 |   └swagger.js
 ├─bin
 |  └www

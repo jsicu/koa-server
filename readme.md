@@ -1,29 +1,105 @@
-# koa2-server
+# 演示项目开源版（后端代码）
 
-基于 koa2 的后端服务工程
+### 项目介绍
 
-### 必备条件
+该项目是基于koa2 + vue 的前后端分离的中后台管理系统，前后端源码完全开源，可二次开发，可学习可商用，让您快速搭建个性化独立网站。
 
-- node >= 10.0.0
-- 本地安装 mysql 数据库，我安装的是 8.0 版本的
+- [在线预览](http://demo.udoudou.cn/#/login?redirect=%2F)
+- [介绍文档](https://blog.csdn.net/qq_38734862/category_10091564.html?spm=1001.2014.3001.5482)
+- [前端代码](https://gitee.com/jsicu/vue-client)
 
-### 目录树生成
+```markdown
+如果对您有帮助，您可以点右上角 “Star” 收藏一下 ，获取第一时间更新，谢谢！
+```
 
-cmd 运行：treer -e treer.md -i "/node_modules|.git|.log|.png|.jpg/"
 
-### swagger 地址
 
-http://localhost:4000/swagger
+### 功能
+
+```
+- 登录 / 注销
+- token权限验证
+- 系统日志文件
+- swagger文档
+- Sequelize映射
+- 邮件功能
+- 异常处理
+```
+
+
 
 ### 启动项目
 
-```js
-// 安装依赖
-npm i || cnpm i
+#### 必备条件
 
-// 运行项目
+- node >= 10.0.0
+-  mysql 数据库>= 8.0
+-  redis
+
+
+
+#### 其他依赖
+
+```shell
+// 这是用来导出数据库已有表模型时需要的依赖
+npm i -g sequelize sequelize-auto mysql2
+```
+
+
+
+#### 了解目录结构
+
+打开treer.md文件，查看项目目录结构，让你更快的使用或修改
+
+
+
+#### 安装依赖
+
+```shell
+# 克隆项目
+git clone https://gitee.com/jsicu/koa-server.git
+
+// # 建议不要直接使用 cnpm 安装依赖，会有各种诡异的 bug。可以通过如下操作解决 npm 下载速度慢的问题
+npm install --registry=https://registry.npm.taobao.org
+```
+
+
+
+#### 数据库创建
+
+在这我使用sequelize库创建数据库模型，步骤如下：
+
+- 首先在安装mysql8.0+数据库，新增数据库，将数据库名称、账号、密码更新到**./db/db.js**
+- 控制台输入：node dbSync.js 同步数据库模型，此时在数据库里就创建了几个基本的表
+- 使用navicat或者其他工具在新建好的数据库中插入数据，数据插入指令在**./data.sql** 中，直接复制到navicat的查询中运行即可
+
+
+
+#### 运行项目
+
+```shell
 npm run start
 ```
+
+
+
+#### 打开swagger
+
+如果启动没报错，可以在浏览器输入：http://localhost:4000/swagger 查看服务swagger文档
+
+
+
+### 注意事项
+
+该项目中用到了canvas@2.7.0库，本地运行使用没有问题，如果要使用这个包并部署到linux服务器上可能会报错。
+
+
+
+### License
+
+[MIT](https://github.com/PanJiaChen/vue-element-admin/blob/master/LICENSE)
+
+Copyright (c) 2020-present linzhongqi
 
 
 

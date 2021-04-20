@@ -2,39 +2,25 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-03-04 22:11:02
+ * @LastEditTime: 2021-04-19 10:51:25
  * @Description: mysql配置
  */
 const mq = require('mysql2');
-const mysql = mq.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'password',
-  database: 'koa2_server',
-  charset: 'utf8mb4',
-  multipleStatements: true // 支持执行多条 sql 语句
-});
+const proSql = require('./sql.json');
+
+const g = global.config;
+const SQL_CFG = g.NODE_ENV === 'development' ? g.dev : proSql;
+// 如有报错使用下面这个
+// const SQL_CFG = g.NODE_ENV === 'development' ? g.dev : g.pro;
+const mysql = mq.createConnection(SQL_CFG);
 
 mysql.connect(err => {
   if (err) throw err;
   console.log('数据库连接成功!');
 });
-// mysql.query(
-//   'SELECT * FROM `koa2_server`.`user` LIMIT 0,1',
-//   (error, results, fields) => {
-//     if (error) throw error;
-//     console.log('The solution is: ', results);
-//   }
-// );
 
 // 连接池连接
-const pool = mq.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'password',
-  database: 'koa2_server',
-  multipleStatements: true // 支持执行多条 sql 语句
-});
+const pool = mq.createPool(SQL_CFG);
 
 // 接收一个sql语句 以及所需的values
 // 这里接收第二参数values的原因是可以使用mysql的占位符 '?'

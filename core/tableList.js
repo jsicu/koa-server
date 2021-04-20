@@ -1,17 +1,11 @@
-/**
- * 类说明
- * @class 列表返回公共类
- * @constructor
+/*
+ * @Author: linzq
+ * @Date: 2021-03-16 21:54:34
+ * @LastEditors: linzq
+ * @LastEditTime: 2021-03-16 22:08:30
+ * @Description: 列表返回公共类
  */
 class Table {
-  // constructor(total, list) {
-  //   // pageSize = undefined, pageNum = undefined
-  //   this.total = total;
-  //   this.list = list;
-  //   // this.pageSize = pageSize;
-  //   // this.pageNum = pageNum;
-  // }
-
   /** 方法说明
    * @method 列表返回
    * @for Table
@@ -21,7 +15,7 @@ class Table {
    * @param number pageNum 页码
    * @return Object
    */
-  tableList(total, list, pageSize, pageNum) {
+  static tableList(total, list, pageSize, pageNum) {
     const res = {
       total,
       list,
@@ -38,7 +32,7 @@ class Table {
    * @param object list 列表
    * @return Object
    */
-  tableTotal(total, list) {
+  static tableTotal(total, list) {
     const res = {
       total,
       list

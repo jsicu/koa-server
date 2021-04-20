@@ -5,13 +5,13 @@
   "scripts": {
     "start": "nodemon bin/www",
     "dev": "./node_modules/.bin/nodemon bin/www",
-    "prd": "pm2 start bin/www",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prd": "pm2 start bin/www --name=koaServer --watch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "models": "sequelize-auto -h localhost -d koa2_server -u root -x password -p 3306 -o ./db/models -e mysql -a ./config/db.json --caseProp c --caseModel c"
   },
   "dependencies": {
     "@koa/multer": "^3.0.0",
-    "canvas": "^2.6.1",
-    "crypto": "^1.0.1",
+    "canvas": "^2.7.0",
     "debug": "^4.1.1",
     "joi": "^17.1.1",
     "jsonwebtoken": "^8.5.1",
@@ -23,20 +23,24 @@
     "koa-onerror": "^4.1.0",
     "koa-router": "^7.4.0",
     "koa-send": "^5.0.1",
-    "koa-session": "^6.0.0",
     "koa-static": "^5.0.0",
     "koa-views": "^6.2.0",
     "koa2-cors": "^2.0.6",
     "koa2-swagger-ui": "^4.0.0",
     "log4js": "^6.3.0",
     "mime-types": "^2.1.27",
+    "module-alias": "^2.2.2",
     "multer": "^1.4.2",
     "mysql2": "^2.1.0",
     "node-rsa": "^1.0.8",
     "nodemailer": "^6.4.10",
-    "pug": "^2.0.3",
+    "pug": "^3.0.1",
     "qr-image": "^3.2.0",
-    "swagger-jsdoc": "^4.0.0"
+    "redis": "^3.1.1",
+    "require-directory": "^2.1.1",
+    "sequelize": "^6.6.1",
+    "swagger-jsdoc": "^4.0.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
@@ -48,5 +52,24 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "nodemon": "^1.19.1"
+  },
+  "_moduleAliases": {
+    "root": ".",
+    "@db": "./db",
+    "@config": "./config/config",
+    "@redis": "./core/redis"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jsicu/koa-server.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jsicu/koa-server/issues"
+  },
+  "homepage": "https://github.com/jsicu/koa-server",
+  "engines": {
+    "node": ">=14",
+    "mysql": ">=8.0"
   }
 }
