@@ -87,7 +87,7 @@ app.use(async (ctx, next) => {
     await next();
   } else {
     // 白名单接口
-    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/index']; //, '/common'
+    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/index', '/common']; //
     if (!WHITELIST.some(element => element === ctx.request.url)) {
       const headerToken = ctx.request.header.token;
       const queryToken = ctx.query.token;
