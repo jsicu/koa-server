@@ -49,7 +49,7 @@ npm i -g sequelize sequelize-auto mysql2
 
 #### 了解目录结构
 
-打开treer.md文件，查看项目目录结构，让你更快的使用或修改
+打开[treer.md](./treer.me)文件，查看项目目录结构，让你更快的使用或修改
 
 
 
@@ -89,15 +89,15 @@ npm run start
 
 
 
-### 注意事项
+### 注意事项及问题
 
-该项目中用到了canvas@2.7.0库，本地运行使用没有问题，如果要使用这个包并部署到linux服务器上可能会报错。
+[Q&A.md](./Q&A.md)
 
 
 
 ### License
 
-[MIT](https://github.com/PanJiaChen/vue-element-admin/blob/master/LICENSE)
+[MIT](https://github.com/jsicu/koa-server/blob/master/LICENSE)
 
 Copyright (c) 2020-present linzhongqi
 
