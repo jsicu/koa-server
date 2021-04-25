@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-04-20 17:28:38
+ * @LastEditTime: 2021-04-25 20:10:46
  * @Description: 统一接口返回格式
  */
 
@@ -21,7 +21,7 @@ exports.response = async (ctx, data, code, message) => {
     code = code[0];
   }
   // refreshToken
-  if (ctx.request.header.refresh_token) {
+  if (ctx.request.header.refresh_token && ctx.checkToken(ctx.request.header.refresh_token, false)) {
     ctx.res.setHeader('Authorization', ctx.getToken(ctx.request.header.token, global.config.refreshTime));
   } else if (ctx.response.header.refresh) {
     return (ctx.body = {
