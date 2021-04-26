@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-04-25 20:29:39
+ * @LastEditTime: 2021-04-26 22:43:40
  * @Description: token相关
  */
 const jwt = require('jsonwebtoken');
@@ -86,10 +86,12 @@ exports.checkToken = (ctx, tokens, type = true) => {
   }
   const decoded = jwt.decode(decrypted, secret);
   // 600秒过期预警
-  if (type && decoded.exp > new Date() / 1000 && decoded.exp < new Date() / 1000 + 600) {
-    ctx.append('refresh', true);
-  } else {
-    ctx.remove('refresh');
+  if (type) {
+    if (decoded.exp > new Date() / 1000 && decoded.exp < new Date() / 1000 + 600) {
+      ctx.append('refresh', true);
+    } else {
+      ctx.remove('refresh');
+    }
   }
 
   return !(decoded && decoded.exp <= new Date() / 1000);

@@ -61,7 +61,7 @@ app.use(
     //   }
     //   return 'http://localhost:3999'; // 这样就能只允许 http://localhost:8080 这个域名的请求了
     // },
-    exposeHeaders: ['Authorization'],
+    exposeHeaders: ['Authorization']
     // maxAge: 3600,
     // credentials: true,
     // allowMethods: ['GET', 'POST', 'DELETE', 'PUT'],
@@ -87,16 +87,16 @@ app.use(async (ctx, next) => {
     await next();
   } else {
     // 白名单接口
-    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/index', '/common']; //
+    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/index']; //, '/common'
     if (!WHITELIST.some(element => element === ctx.request.url)) {
       const headerToken = ctx.request.header.token;
       const queryToken = ctx.query.token;
       if (headerToken || queryToken) {
         if (!ctx.checkToken(headerToken || queryToken)) {
-          return ctx.error([0, '令牌已过期！']);
+          return ctx.error([401, '令牌已过期！']);
         }
       } else {
-        return ctx.error([0, 'token检验未通过！']);
+        return ctx.error([401, 'token检验未通过！']);
       }
     }
     await next();
