@@ -89,13 +89,30 @@ app.use(
 app.use(async (ctx, next) => {
   // 权限白名单 POSTMAN SWAGGER
   const POSTMAN = ctx.request.header['user-agent'].slice(0, 7);
+  const url = ctx.path;
   // eslint-disable-next-line dot-notation
   // const SWAGGER = ctx.request.header['referer'].slice(-7);
+
   if (POSTMAN === 'Postman' && global.config.NODE_ENV === 'development') {
+    // 请求转发，服务代理
+    // http://xxx:4000/nest/xx的请求会转发到http://xxx:3000/nest/xx
+    if (url.startsWith('/nest')) {
+      const data = await ctx.httpProxy({
+        host: 'localhost:3000' // 多代理，nest地址代理到localhost:3000
+      });
+      // 这里可以做一些请求之后需要处理的事情
+      ctx.body = data;
+    } else if (url.startsWith('/test')) {
+      const data = await ctx.httpProxy({
+        host: 'localhost:3000', // 多代理，nest地址代理到localhost:3000
+        url: '/nest/schedule'
+      });
+      // 这里可以做一些请求之后需要处理的事情
+      ctx.body = data;
+    }
     // postman只能访问开发环境的服务
     await next();
   } else {
-    const url = ctx.path;
     // 白名单接口
     const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/index']; //, '/common'
     if (!WHITELIST.some(element => element === url)) {
@@ -109,6 +126,7 @@ app.use(async (ctx, next) => {
         return ctx.error([401, 'token检验未通过！']);
       }
     }
+
     // 请求转发，服务代理
     // http://xxx:4000/nest/xx的请求会转发到http://xxx:3000/nest/xx
     if (url.startsWith('/nest')) {

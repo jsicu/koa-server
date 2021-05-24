@@ -2,14 +2,13 @@
  * @Author: linzq
  * @Date: 2021-05-21 14:45:34
  * @LastEditors: linzq
- * @LastEditTime: 2021-05-21 16:08:04
+ * @LastEditTime: 2021-05-24 20:20:12
  * @Description: 请求转发，服务代理
  */
 const axios = require('axios');
 
 module.exports = (opts = {}) => {
   return (ctx, next) => {
-    // console.log(ctx.httpProxy);
     if (!ctx.httpProxy) {
       proxy(ctx, opts);
     }
@@ -20,14 +19,9 @@ module.exports = (opts = {}) => {
 
 function proxy(ctx, opts) {
   ctx.httpProxy = (params = {}) => {
-    console.log(params);
-    if (!params.host) {
-      params = Object.assign({}, { host: opts.apiHost || '' }, params);
-    }
+    params = Object.assign({}, { host: opts.apiHost || '' }, params);
 
-    // console.log(formatReqParams(ctx, params));
-    let reqParams = Object.assign({}, params, formatReqParams(ctx, params));
-    console.log(reqParams);
+    const reqParams = Object.assign({}, params, formatReqParams(ctx, params));
     if (reqParams.method.toUpperCase() !== 'GET') {
       reqParams.data = params.data || ctx.request.body;
     }
@@ -35,21 +29,20 @@ function proxy(ctx, opts) {
     delete reqParams.headers.host;
     return axios(reqParams)
       .then(res => {
-        let { data, headers } = res;
+        const { data, headers } = res;
 
         setResCookies(ctx, headers);
 
         return data;
       })
       .catch(err => {
-        // TODO
         // console.log(err)
         return err;
       });
   };
 }
 function setResCookies(ctx, headers) {
-  let resCookies = headers['set-cookie'];
+  const resCookies = headers['set-cookie'];
 
   if (!headers || !resCookies || !resCookies.length || resCookies.length <= 0 || !resCookies[0]) {
     return;
@@ -71,9 +64,8 @@ function setResCookies(ctx, headers) {
  */
 function formatReqParams(ctx, params) {
   let { url, method, headers, protocol } = ctx;
-  console.log(url);
-  let { host } = params;
-  let hasProtocol = /(http|s):\/\//;
+  const { host } = params;
+  const hasProtocol = /(http|s):\/\//;
 
   url = params.url || url;
   method = params.method || method;
@@ -81,9 +73,7 @@ function formatReqParams(ctx, params) {
   headers = Object.assign({}, headers, params.headers, {
     'content-type': params['content-type'] || headers['content-type'] || 'application/x-www-form-urlencoded'
   });
-  console.log(url);
   url = `${protocol}://${host}${url}`;
-  console.log(url);
   delete params.host;
 
   return { url, method, protocol, headers };
