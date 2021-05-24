@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2020-11-25 10:02:48
  * @LastEditors: linzq
- * @LastEditTime: 2021-04-20 17:28:38
+ * @LastEditTime: 2021-04-26 23:20:50
  * @Description: 统一接口返回格式
  */
 
@@ -20,9 +20,19 @@ exports.response = async (ctx, data, code, message) => {
     message = code[1];
     code = code[0];
   }
+  // XXX: 只验证客户端返回的refreshToken，未比较数据库数据，可以改进
+  // ! 改进办法刷令牌单独一个接口
   // refreshToken
   if (ctx.request.header.refresh_token) {
-    ctx.res.setHeader('Authorization', ctx.getToken(ctx.request.header.token, global.config.refreshTime));
+    if (ctx.checkToken(ctx.request.header.refresh_token, false)) {
+      ctx.res.setHeader('Authorization', ctx.getToken(ctx.request.header.token, global.config.refreshTime));
+    } else {
+      return (ctx.body = {
+        code: 401,
+        data: '',
+        message: '令牌已过期！'
+      });
+    }
   } else if (ctx.response.header.refresh) {
     return (ctx.body = {
       code,

@@ -20,6 +20,7 @@ const response = require('./middleware/response');
 const token = require('./middleware/token');
 const myLog = require('./middleware/log');
 const validate = require('./middleware/validate');
+const httpProxy = require('./middleware/httpProxy');
 const utils = require('./middleware');
 
 // 公告方法
@@ -61,7 +62,7 @@ app.use(
     //   }
     //   return 'http://localhost:3999'; // 这样就能只允许 http://localhost:8080 这个域名的请求了
     // },
-    exposeHeaders: ['Authorization'],
+    exposeHeaders: ['Authorization']
     // maxAge: 3600,
     // credentials: true,
     // allowMethods: ['GET', 'POST', 'DELETE', 'PUT'],
@@ -75,29 +76,65 @@ app.use(json());
 app.use(logger());
 app.use(require('koa-static')(__dirname + '/public')); // 静态资源
 app.use(utils); // 公共方法
+// apiHost即是你要转发请求到后端的host，其他的参数可以参考axioshttps://github.com/axios/axios
+// 请求转发中间件，暂时只支持转发到另一个地址
+// TODO: 支持多转发
+app.use(
+  httpProxy({
+    apiHost: 'localhost:3000' // 全局端口
+  })
+);
 
 // 权限认证
 app.use(async (ctx, next) => {
   // 权限白名单 POSTMAN SWAGGER
   const POSTMAN = ctx.request.header['user-agent'].slice(0, 7);
+  const url = ctx.path;
   // eslint-disable-next-line dot-notation
   // const SWAGGER = ctx.request.header['referer'].slice(-7);
+
   if (POSTMAN === 'Postman' && global.config.NODE_ENV === 'development') {
+    // 请求转发，服务代理
+    // http://xxx:4000/nest/xx的请求会转发到http://xxx:3000/nest/xx
+    if (url.startsWith('/nest')) {
+      const data = await ctx.httpProxy({
+        host: 'localhost:3000' // 多代理，nest地址代理到localhost:3000
+      });
+      // 这里可以做一些请求之后需要处理的事情
+      ctx.body = data;
+    } else if (url.startsWith('/test')) {
+      const data = await ctx.httpProxy({
+        host: 'localhost:3000', // 多代理，nest地址代理到localhost:3000
+        url: '/nest/schedule'
+      });
+      // 这里可以做一些请求之后需要处理的事情
+      ctx.body = data;
+    }
     // postman只能访问开发环境的服务
     await next();
   } else {
     // 白名单接口
-    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/index', '/common']; //
-    if (!WHITELIST.some(element => element === ctx.request.url)) {
+    const WHITELIST = ['/security/publicKey', '/security/login', '/security/logOut', '/index']; //, '/common'
+    if (!WHITELIST.some(element => element === url)) {
       const headerToken = ctx.request.header.token;
       const queryToken = ctx.query.token;
       if (headerToken || queryToken) {
         if (!ctx.checkToken(headerToken || queryToken)) {
-          return ctx.error([0, '令牌已过期！']);
+          return ctx.error([401, '令牌已过期！']);
         }
       } else {
-        return ctx.error([0, 'token检验未通过！']);
+        return ctx.error([401, 'token检验未通过！']);
       }
+    }
+
+    // 请求转发，服务代理
+    // http://xxx:4000/nest/xx的请求会转发到http://xxx:3000/nest/xx
+    if (url.startsWith('/nest')) {
+      const data = await ctx.httpProxy({
+        host: 'localhost:3000' // 多代理，nest地址代理到localhost:3000
+      });
+      // 这里可以做一些请求之后需要处理的事情
+      ctx.body = data;
     }
     await next();
   }
