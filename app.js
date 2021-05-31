@@ -102,13 +102,6 @@ app.use(async (ctx, next) => {
       });
       // 这里可以做一些请求之后需要处理的事情
       ctx.body = data;
-    } else if (url.startsWith('/test')) {
-      const data = await ctx.httpProxy({
-        host: 'localhost:3000', // 多代理，nest地址代理到localhost:3000
-        url: '/nest/schedule'
-      });
-      // 这里可以做一些请求之后需要处理的事情
-      ctx.body = data;
     }
     // postman只能访问开发环境的服务
     await next();

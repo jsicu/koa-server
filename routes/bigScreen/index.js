@@ -11,8 +11,25 @@ const router = require('koa-router')();
 const sql = require('./sql');
 const Joi = require('joi'); // 参数校验
 const models = require('@db/index');
+const { v4 } = require('uuid'); // uuid生成
 const { Op } = require('sequelize');
+
 router.prefix('/bigScreen');
+
+router.get('/dest', async ctx => {
+  const data = ctx.request.body;
+  const schema = Joi.object({
+    destId: Joi.required().invalid('').error(new Error('景区id参数不得为空'))
+  });
+  const { destId } = data;
+  const required = { destId };
+  const value = schema.validate(required);
+  if (value.error) throw new global.err.ParamError(value.error.message);
+  const res = await models.scenicSpot.findAll({
+    where: required
+  });
+  ctx.success(res);
+});
 
 // #region
 /**
@@ -23,10 +40,10 @@ router.prefix('/bigScreen');
  *     description: 景区详情
  *     tags: [可视化模块]
  *     parameters:
- *       - name: deatId
- *         description: id
+ *       - name: destName
+ *         description: 景区名称
  *         in: formData
- *         type: number
+ *         type: string
  *     responses:
  *       '200':
  *         description: Ok
@@ -49,32 +66,19 @@ router.prefix('/bigScreen');
  *       - token: {}
  */
 // #endregion
-router.get('/dest', async ctx => {
-  const data = ctx.request.body;
-  const schema = Joi.object({
-    destId: Joi.required().invalid('').error(new Error('景区id参数不得为空'))
-  });
-  const { destId } = data;
-  const required = { destId };
-  const value = schema.validate(required);
-  if (value.error) throw new global.err.ParamError(value.error.message);
-  const res = await models.scenicSpot.findAll({
-    where: required
-  });
-  ctx.success(res);
-});
-
 router.post('/dest', async ctx => {
   const data = ctx.request.body;
+  console.log(data);
   const schema = Joi.object({
     destName: Joi.required().invalid('').error(new Error('景区名称不得为空'))
   });
   const { destName } = data;
-  const required = { destName };
+  let required = { destName };
   const value = schema.validate(required);
   if (value.error) throw new global.err.ParamError(value.error.message);
-  const res = await models.scenicSpot.create(data);
-  ctx.success(res);
+  required = { ...required, destId: v4() };
+  // const res = await models.scenicSpot.create(required);
+  ctx.success(true);
 });
 
 router.put('/dest', async ctx => {
@@ -116,7 +120,7 @@ router.delete('/dest', async ctx => {
 /**
  * @swagger
  * /bigScreen/list:
- *   post:
+ *   get:
  *     summary: 数据列表
  *     description: 数据列表
  *     tags: [可视化模块]

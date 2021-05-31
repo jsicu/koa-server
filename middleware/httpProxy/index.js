@@ -2,10 +2,11 @@
  * @Author: linzq
  * @Date: 2021-05-21 14:45:34
  * @LastEditors: linzq
- * @LastEditTime: 2021-05-24 20:20:12
+ * @LastEditTime: 2021-05-31 23:16:59
  * @Description: 请求转发，服务代理
  */
 const axios = require('axios');
+const qs = require('qs');
 
 module.exports = (opts = {}) => {
   return (ctx, next) => {
@@ -21,9 +22,13 @@ function proxy(ctx, opts) {
   ctx.httpProxy = (params = {}) => {
     params = Object.assign({}, { host: opts.apiHost || '' }, params);
 
-    const reqParams = Object.assign({}, params, formatReqParams(ctx, params));
+    let reqParams = Object.assign({}, params, formatReqParams(ctx, params));
     if (reqParams.method.toUpperCase() !== 'GET') {
       reqParams.data = params.data || ctx.request.body;
+    }
+    // application/x-www-form-urlencoded形式转发参数乱码修改
+    if (qs.stringify(ctx.request.body)) {
+      reqParams = { ...reqParams, data: qs.stringify(ctx.request.body) };
     }
 
     delete reqParams.headers.host;
@@ -70,9 +75,7 @@ function formatReqParams(ctx, params) {
   url = params.url || url;
   method = params.method || method;
   protocol = hasProtocol.test(url) ? url.split(':')[0] : params.protocol || protocol;
-  headers = Object.assign({}, headers, params.headers, {
-    'content-type': params['content-type'] || headers['content-type'] || 'application/x-www-form-urlencoded'
-  });
+
   url = `${protocol}://${host}${url}`;
   delete params.host;
 
