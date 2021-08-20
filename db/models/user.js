@@ -11,7 +11,7 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(255),
       allowNull: false,
       comment: "用户名，唯一",
-      unique: "user_name",
+      unique: "IDX_d34106f8ec1ebaf66f4f8609dd",
       field: 'user_name'
     },
     password: {
@@ -19,12 +19,22 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       comment: "密码"
     },
+    mailbox: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      comment: "注册邮箱"
+    },
     isCancel: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: 0,
       comment: "状态 0：有效，1：失效",
       field: 'is_cancel'
+    },
+    power: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      comment: "权限树"
     },
     createTime: {
       type: DataTypes.DATE,
@@ -65,6 +75,14 @@ module.exports = function(sequelize, DataTypes) {
       },
       {
         name: "user_name",
+        unique: true,
+        using: "BTREE",
+        fields: [
+          { name: "user_name" },
+        ]
+      },
+      {
+        name: "IDX_d34106f8ec1ebaf66f4f8609dd",
         unique: true,
         using: "BTREE",
         fields: [

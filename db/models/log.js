@@ -49,20 +49,24 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true,
       comment: "所在地"
     },
-    deleteTime: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      field: 'delete_time'
-    },
     createTime: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATE(6),
       allowNull: false,
+      comment: "创造时间",
       field: 'create_time'
     },
     updateTime: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATE(6),
       allowNull: false,
+      defaultValue: "0162-09-12 09:32:46.000000",
+      comment: "最后更新时间",
       field: 'update_time'
+    },
+    deleteTime: {
+      type: DataTypes.DATE(6),
+      allowNull: true,
+      comment: "删除时间",
+      field: 'delete_time'
     }
   }, {
     sequelize,

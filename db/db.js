@@ -28,6 +28,10 @@ const sequelize = new Sequelize(db.database, db.user, db.password, {
   },
   logging: false, // 关闭打印
   // 解决中文输入问题
+  dialectOptions: {
+    dateStrings: true,
+    typeCast: true
+  },
   define: {
     timestamps: true, // 是否自动创建时间字段， 默认会自动创建createdAt、updatedAt
     paranoid: true, // 是否自动创建deletedAt字段

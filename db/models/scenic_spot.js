@@ -11,7 +11,7 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(64),
       allowNull: false,
       comment: "景区id",
-      unique: "dest_id",
+      unique: "IDX_cf6216c5403f1e6700f30d7a89",
       field: 'dest_id'
     },
     destName: {
@@ -252,6 +252,14 @@ module.exports = function(sequelize, DataTypes) {
       },
       {
         name: "dest_id",
+        unique: true,
+        using: "BTREE",
+        fields: [
+          { name: "dest_id" },
+        ]
+      },
+      {
+        name: "IDX_cf6216c5403f1e6700f30d7a89",
         unique: true,
         using: "BTREE",
         fields: [

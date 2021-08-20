@@ -6,7 +6,7 @@ const crypto = require('crypto'); // 引入fs模块
 const http = require('http');
 const models = require('@db/index');
 
-const { v1 } = require('uuid'); // uuid生成
+const { v4 } = require('uuid'); // uuid生成
 
 // const NodeRSA = require('node-rsa'); // rsa加密
 // const key = new NodeRSA({ b: 512 });
@@ -243,7 +243,6 @@ router.post('/email-verify', async (ctx, next) => {
 // 注册接口
 // #region
 /**
- * @swagger
  * /security/register:
  *   post:
  *     description: 注册
@@ -276,6 +275,7 @@ router.post('/email-verify', async (ctx, next) => {
  *         description: 获取成功
  */
 // #endregion
+// 后台新增，不验证邮箱验证码
 router.post('/register', async (ctx, next) => {
   const data = ctx.request.body;
   // 如果注册有加密
@@ -283,18 +283,35 @@ router.post('/register', async (ctx, next) => {
   // data.password = key.decrypt(password, 'utf8'); // 解密
   const schema = Joi.object({
     userName: ctx.joiRequired('用户名称'),
-    password: ctx.joiRequired('用户密码')
+    password: ctx.joiRequired('用户密码'),
+    mailbox: ctx.joiRequired('注册邮箱'),
+    power: ctx.joiRequired('账号权限')
   });
-  const { userName, password } = data;
-  const required = { userName, password };
+  const { userName, password, mailbox, power } = data;
+  let required = { userName, password, mailbox, power };
   const value = schema.validate(required);
   if (value.error) throw new global.err.ParamError(value.error.message);
 
-  const hmac = crypto.createHmac('sha256', required.userName);
-  hmac.update(required.password);
-  required.password = hmac.digest('hex');
+  // 前端简易加密，后端直接保存
+  // const hmac = crypto.createHmac('sha256', required.userName);
+  // hmac.update(required.password);
+  // required.password = hmac.digest('hex');
 
-  models.user.create(required);
+  required = {
+    ...required,
+    id: v4(),
+    isCancel: 0
+  };
+
+  models.user
+    .create(required)
+    .then(result => {
+      ctx.success(true);
+    })
+    .catch(err => {
+      ctx.errorLog('sql查询报错', err);
+      ctx.error([0, err.errors[0].message]);
+    });
   ctx.success(true);
 });
 
