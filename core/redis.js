@@ -3,7 +3,7 @@
  * @Date: 2021-04-19 11:44:13
  * @LastEditors: linzq
  * @LastEditTime: 2021-04-20 17:29:39
- * @Description:
+ * @Description: redis配置
  */
 const { redis: redisCfg } = require('@config');
 const redis = require('redis');
@@ -58,7 +58,7 @@ const setString = (key, value, expire) => {
   });
 };
 /**
- * redis setnxString function
+ * redis setnxString function SET if Not eXists
  * @param key
  * @param value
  * @param expire

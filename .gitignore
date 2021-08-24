@@ -5,7 +5,7 @@ logs/
 backups/ 
 public/uploads/ 
 deploy.sh
-sql.json
+privateConfig.json
 
 # Editor directories and files
 .idea

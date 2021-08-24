@@ -6,10 +6,10 @@
  * @Description: mysql配置
  */
 const mq = require('mysql2');
-const proSql = require('./sql.json');
+const privateConfig = require('./privateConfig.json');
 
 const g = global.config;
-const SQL_CFG = g.NODE_ENV === 'development' ? g.dev : proSql;
+const SQL_CFG = g.NODE_ENV === 'development' ? g.dev : privateConfig.sql;
 // 如有报错使用下面这个
 // const SQL_CFG = g.NODE_ENV === 'development' ? g.dev : g.pro;
 const mysql = mq.createConnection(SQL_CFG);
