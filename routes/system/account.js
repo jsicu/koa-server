@@ -90,7 +90,7 @@ router.get('/list', async (ctx, next) => {
     if (required[i]) {
       search[i] = { [Op.substring]: required[i] };
     }
-  });
+  }
   const { count, rows } = await models.user.findAndCountAll({
     attributes: ['id', 'userName', 'mailbox', 'isCancel', 'createTime'],
     offset: (pageNum - 1) * pageSize,
