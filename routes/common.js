@@ -10,6 +10,7 @@ const router = require('koa-router')();
 const path = require('path');
 const fs = require('fs');
 const models = require('@db/index');
+const { Op } = require('sequelize');
 
 const seq = require('@db/db');
 
@@ -196,6 +197,64 @@ router.get('/getToken', async (ctx, next) => {
     })
     .on('error', e => {});
   ctx.success(true);
+});
+
+// 处理级联数据
+function toTreeData(data, attr) {
+  const tree = [];
+  const resData = data;
+  for (let i = 0; i < resData.length; i++) {
+    if (resData[i].parentId === attr.rootId) {
+      let obj = {
+        id: resData[i][attr.id],
+        name: resData[i][attr.name],
+        children: []
+      };
+      tree.push(obj);
+      resData.splice(i, 1);
+      i--;
+    }
+  }
+  const run = function (treeArr) {
+    if (resData.length > 0) {
+      for (let i = 0; i < treeArr.length; i++) {
+        for (let j = 0; j < resData.length; j++) {
+          if (treeArr[i].id === resData[j][attr.parentId]) {
+            const obj = {
+              id: resData[j][attr.id],
+              name: resData[j][attr.name],
+              children: []
+            };
+            treeArr[i].children.push(obj);
+            resData.splice(j, 1);
+            j--;
+          }
+        }
+        run(treeArr[i].children);
+      }
+    }
+  };
+  run(tree);
+  return tree;
+}
+
+// 省市字典
+router.get('/cityDic', async (ctx, next) => {
+  const res = await models.unitDivision.findAll({
+    attributes: ['divisionId', 'divisionName', 'divisionCode', 'parentId'],
+    where: {
+      divisionLevel: {
+        [Op.or]: [1, 2]
+      }
+    }
+  });
+  const obj = {
+    id: 'divisionId',
+    parentId: 'parentId',
+    name: 'divisionName',
+    rootId: 1
+  };
+  ctx.success(toTreeData(res, obj));
 });
 
 module.exports = router;

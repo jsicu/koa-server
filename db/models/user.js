@@ -28,7 +28,7 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: 0,
-      comment: "状态 0：有效，1：失效",
+      comment: "状态 0：无效，1：有效",
       field: 'is_cancel'
     },
     power: {
