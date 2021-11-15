@@ -27,10 +27,32 @@ router.get('/', async (ctx, next) => {
 
 // 导航栏获取
 router.get('/navigation', async (ctx, next) => {
+  const decryptTk = ctx.decryptRSAToken(ctx.request.header.token);
+  let userInfo = await models.user.findAll({
+    where: {
+      id: { [Op.eq]: decryptTk.id }
+    }
+  });
+  userInfo = JSON.parse(JSON.stringify(userInfo))[0];
+  console.log(!userInfo.isCancel);
+  if (!userInfo.isCancel) return ctx.success({ message: '账号已被禁用，请联系管理员!', status: false });
+
+  const power = userInfo.power.split(',');
   const res = await models.route.findAll({
     attributes: ['id', 'name', 'alias'],
-    where: { status: 1 }
+    where: {
+      [Op.and]: [
+        { status: 1 },
+        {
+          id: {
+            [Op.or]: power
+          }
+        }
+      ]
+    }
   });
+  console.log(res);
+
   ctx.success(Table.tableTotal(undefined, res));
 });
 

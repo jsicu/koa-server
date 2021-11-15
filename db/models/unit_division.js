@@ -61,11 +61,11 @@ module.exports = function(sequelize, DataTypes) {
       comment: "更新时间",
       field: 'update_time'
     },
-    deleted: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0,
-      comment: "是否删除（1是\/0否）"
+    deleteTime: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: "删除时间",
+      field: 'delete_time'
     }
   }, {
     sequelize,

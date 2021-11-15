@@ -2,10 +2,16 @@ const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('route', {
     id: {
-      autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
+    },
+    parentId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      comment: "父类id，一级目录为0",
+      field: 'parent_id'
     },
     name: {
       type: DataTypes.STRING(64),
@@ -17,10 +23,10 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       comment: "路由地址"
     },
-    icon: {
+    description: {
       type: DataTypes.STRING(64),
       allowNull: true,
-      comment: "图标"
+      comment: "路由描述"
     },
     status: {
       type: DataTypes.BOOLEAN,

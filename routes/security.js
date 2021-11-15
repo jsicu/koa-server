@@ -61,16 +61,22 @@ router.post('/login', async (ctx, next) => {
   const hmac = crypto.createHmac('sha256', required.userName);
   hmac.update(required.password);
   required.password = hmac.digest('hex');
-  required = { ...required, isCancel: 1 };
+  required = { ...required };
   const res = await models.user.findAll({
     where: required
   });
+  const list = JSON.parse(JSON.stringify(res));
+
+  if (res.length > 0 && !list[0].isCancel) {
+    return ctx.success({ message: '账号已被禁用，请联系管理员!', status: false });
+  }
   let loginSuccess = false;
   if (res.length > 0) {
     loginSuccess = true;
     const tk = ctx.getToken({ name: res[0].userName, id: res[0].id }, global.config.refreshTime); // token中要携带的信息，自己定义
     const refreshTk = ctx.getToken({ name: res[0].userName, id: res[0].id }, '1d'); // token中要携带的信息，自己定义
     ctx.success({
+      status: true,
       id: res[0].id,
       token: tk,
       refreshToken: refreshTk
@@ -83,7 +89,7 @@ router.post('/login', async (ctx, next) => {
       userId: res[0].id
     });
   } else {
-    ctx.error([0, '用户名或密码错误']);
+    ctx.success({ status: false, message: '用户名或密码错误' });
   }
 
   // ip所在地查询
@@ -387,11 +393,11 @@ router.put('/account', async (ctx, next) => {
   const data = ctx.request.body;
   const schema = Joi.object({
     userName: ctx.joiRequired('用户名称'),
-    mailbox: ctx.joiRequired('注册邮箱'),
-    power: ctx.joiRequired('账号权限')
+    mailbox: ctx.joiRequired('注册邮箱')
+    // power: ctx.joiRequired('账号权限')
   });
   const { userName, password, mailbox, power, code, isCancel, id } = data;
-  let required = { userName, mailbox, power };
+  let required = { userName, mailbox };
   const value = schema.validate(required);
   if (value.error) throw new global.err.ParamError(value.error.message);
 

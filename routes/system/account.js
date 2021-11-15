@@ -97,7 +97,14 @@ router.get('/list', async (ctx, next) => {
     limit: pageSize - 0,
     where: search
   });
-  ctx.success(Table.tableTotal(count, rows));
+  const list = JSON.parse(JSON.stringify(rows));
+  for (let i = 0; i < list.length; i++) {
+    const element = list[i];
+    if (element.id === '00000000-0000-0000-0000-000000000000') {
+      list[i].disabled = true;
+    }
+  }
+  ctx.success(Table.tableTotal(count, list));
 });
 
 module.exports = router;
