@@ -30,7 +30,8 @@ const sequelize = new Sequelize(db.database, db.user, db.password, {
   // 解决中文输入问题
   dialectOptions: {
     dateStrings: true,
-    typeCast: true
+    typeCast: true,
+    multipleStatements: true
   },
   define: {
     timestamps: true, // 是否自动创建时间字段， 默认会自动创建createdAt、updatedAt

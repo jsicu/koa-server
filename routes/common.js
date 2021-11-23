@@ -34,7 +34,6 @@ router.get('/navigation', async (ctx, next) => {
     }
   });
   userInfo = JSON.parse(JSON.stringify(userInfo))[0];
-  console.log(!userInfo.isCancel);
   if (!userInfo.isCancel) return ctx.success({ message: '账号已被禁用，请联系管理员!', status: false });
 
   const power = userInfo.power.split(',');
@@ -51,8 +50,6 @@ router.get('/navigation', async (ctx, next) => {
       ]
     }
   });
-  console.log(res);
-
   ctx.success(Table.tableTotal(undefined, res));
 });
 

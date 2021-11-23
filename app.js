@@ -147,18 +147,6 @@ app.use(async (ctx, next) => {
   if (global.config.NODE_ENV === 'development') {
     logsUtil.logResponse(ctx, ms); // 记录响应日志, 生产环境不输出，减少硬盘使用
   }
-  // 日志白名单
-  // const whiteList = ['/security/login', '/security/email-verify', '/security/publicKey']
-  // if (whiteList.includes(ctx.request.url)) {
-
-  // }
-  // const referer = ctx.request.header.referer || ctx.request.header['user-agent'];
-  // const decryptTk = ctx.decryptRSAToken(ctx.request.header.token);
-  // console.log(ctx.request);
-  // console.log(ctx.request.header['user-agent']);
-  // console.log(referer);
-  // const sql = `INSERT INTO online_token (token) VALUES ('${token}')`; // 存入token
-  // mysql.query(sql);
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`);
 });
 

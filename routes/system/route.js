@@ -2,7 +2,7 @@
  * @Author: linzq
  * @Date: 2021-08-19 17:08:02
  * @LastEditors: linzq
- * @LastEditTime: 2021-11-12 16:06:40
+ * @LastEditTime: 2021-11-18 11:03:15
  * @Description: 路由模块
  */
 
@@ -84,10 +84,10 @@ router.post('/', async ctx => {
     parentId: Joi.number().error(new Error('父菜单不得为空'))
   });
   const { name, alias, status, id, description, parentId = 0 } = data;
-  // const required = { name, alias, status, id, description, parentId };
-  // const value = schema.validate(required);
-  // if (value.error) throw new global.err.ParamError(value.error.message);
-  // const res = await models.route.create(required);
+  const required = { name, alias, status, id, description, parentId };
+  const value = schema.validate(required);
+  if (value.error) throw new global.err.ParamError(value.error.message);
+  await models.route.create(required);
   ctx.success(true);
 
   // 新路由id写进超级账号权限power
@@ -96,8 +96,7 @@ router.post('/', async ctx => {
     attributes: ['userName', 'power'],
     where: { id: '00000000-0000-0000-0000-000000000000' }
   });
-  console.log(userPower[0]);
-  const userUpdate = await models.user.update(
+  await models.user.update(
     { power: `${userPower[0].power},${id}` },
     {
       attributes: ['userName', 'power'],
@@ -117,13 +116,11 @@ router.put('/', async ctx => {
     description: Joi.string().empty('').max(50).error(new Error('菜单描述长度不得超过50')),
     parentId: Joi.number().error(new Error('父菜单不得为空'))
   });
-  console.log(data);
   const { name, alias, status, id, description = '', parentId = 0 } = data;
   const required = { name, alias, status, id, description, parentId };
   const value = schema.validate(required);
   if (value.error) throw new global.err.ParamError(value.error.message);
   const res = await models.route.update(required, { where: { id: required.id } });
-  console.log(JSON.parse(JSON.stringify(res)));
   if (res[0] === 1) {
     ctx.success(true);
   } else {
@@ -137,7 +134,7 @@ router.post('/checkId', async ctx => {
   const data = ctx.request.body;
   const schema = Joi.object({
     id: Joi.string().length(5).error(new Error('菜单id格式不正确')),
-    alias: Joi.string().pattern(/^\//).error(new Error('菜单地址格式不正确'))
+    alias: Joi.string().error(new Error('菜单地址格式不正确'))
   });
   const { id, alias } = data;
   const required = { id, alias };

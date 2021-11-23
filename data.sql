@@ -1011,8 +1011,8 @@ INSERT INTO `route`(`id`, `name`, `alias`, `icon`, `status`, `create_time`, `upd
 -- Records of user
 -- ----------------------------
 
-INSERT INTO `user`(`id`, `user_name`, `password`, `create_time`, `update_time`, `is_cancel`) VALUES ('00000000-0000-0000-0000-000000000000', 'superAccount', '888888', '2020-01-01 00:00:00', '2020-01-01 00:00:00', 0);
-INSERT INTO `user`(`id`, `user_name`, `password`, `create_time`, `update_time`, `is_cancel`) VALUES ('00b817a0-3b71-11eb-a202-8176c989c09a', 'admin', 'f429ec54f354b72bed77a5c0afedecb91f347f479a09f74f4107592764b56d1c', '2020-01-01 00:00:00', '2020-01-01 00:00:00', 0);
+INSERT INTO `user`(`id`, `user_name`, `password`, `create_time`, `update_time`, `is_cancel`) VALUES ('00000000-0000-0000-0000-000000000000', 'superAccount', 'f429ec54f354b72bed77a5c0afedecb91f347f479a09f74f4107592764b56d1c', '2020-01-01 00:00:00', '2020-01-01 00:00:00', 0);
+INSERT INTO `user`(`id`, `user_name`, `password`, `create_time`, `update_time`, `is_cancel`) VALUES ('00b817a0-3b71-11eb-a202-8176c989c09a', 'admin', 'e2af7b7bf094c5c70a8aa481ef1813dd5e1d8758cd85ada302bdf683b300751c', '2020-01-01 00:00:00', '2020-01-01 00:00:00', 0);
 
 -- ----------------------------
 -- Records of dictionary

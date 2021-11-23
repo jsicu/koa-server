@@ -5,6 +5,7 @@ var _log = require("./log");
 var _onlineToken = require("./online_token");
 var _route = require("./route");
 var _scenicSpot = require("./scenic_spot");
+var _sysLog = require("./sys_log");
 var _unitDivision = require("./unit_division");
 var _user = require("./user");
 
@@ -15,6 +16,7 @@ function initModels(sequelize) {
   var onlineToken = _onlineToken(sequelize, DataTypes);
   var route = _route(sequelize, DataTypes);
   var scenicSpot = _scenicSpot(sequelize, DataTypes);
+  var sysLog = _sysLog(sequelize, DataTypes);
   var unitDivision = _unitDivision(sequelize, DataTypes);
   var user = _user(sequelize, DataTypes);
 
@@ -30,6 +32,7 @@ function initModels(sequelize) {
     onlineToken,
     route,
     scenicSpot,
+    sysLog,
     unitDivision,
     user,
   };
